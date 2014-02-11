@@ -23,7 +23,7 @@ public:
 
 private:
 	// Returns the synaptic potential, given a presynaptic potential of 'input'
-	double synPot(double input) { return fmax(input, 0.0); }
+	double synPot(double input);
 
 	// Functions appearing in the model
 	double mInf(double V) { return (1+tanh((V-V1)/V2))/2; }
