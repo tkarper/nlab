@@ -34,7 +34,7 @@ void updateNetwork(nvector* nlist)
 	*********** CONNECTION ROUTINES *************
 
 */
-void connect(Neuron* from, nvector* to, double w)	
+void connect_one_to_many(Neuron* from, nvector* to, double w)	
 {
 	Neuron* nr;
 	for(int j=0;j<to->size();j++)
@@ -46,7 +46,7 @@ void connect(Neuron* from, nvector* to, double w)
 }
 
 
-void connect(nvector* from, nvector* to,  ConMat* M)
+void connect_with_matrix(nvector* from, nvector* to,  ConMat* M)
 {
 	int ix;
 	Neuron* frm; 
@@ -67,25 +67,6 @@ void connect(nvector* from, nvector* to,  ConMat* M)
 
 
 
-/*
-	
-	************ RETRIEVING DATA ************
-
-*/
-dvector* getField(nvector* neurons)
-{
-	Neuron* nr;
-	dvector* F = new dvector(neurons->size());
-	for(int i =0;i<F->size(); i++)
-	{
-		nr = neurons->at(i);
-		F->push_back(nr->s);
-	}
-		
-	
-	return F;
-	
-}
 
 
 /*

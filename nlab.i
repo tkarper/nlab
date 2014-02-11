@@ -49,23 +49,20 @@
 %include "ConMat.h"
 %include "nlab.h"
 
-%ignore connect(Neuron* from, nvector* to, double w);
-%ignore connect(nvector* from, nvector* to, ConMat* con);
 
 %inline{
 
 PyObject* get_spike_rates(nvector* nr)
 {
-	  double* S = new double[nr->size()];
-	  for(int i =0;i<nr->size();i++)
-	  	S[i] = (nr->at(i))->sp;
-	
 	  npy_intp* npy_size = new npy_intp[1];
       npy_size[0] = (npy_intp) nr->size();
-	  PyArrayObject* array =  (PyArrayObject*) PyArray_SimpleNewFromData(1, npy_size, NPY_DOUBLE, (void*) S); 
+	  PyArrayObject* array =  (PyArrayObject*) PyArray_SimpleNew(1, npy_size, NPY_DOUBLE); 
+	  double * rr = (double*) PyArray_DATA(array);
+	  for(int i =0;i< nr->size(); i++)
+	 	 rr[i] = (nr->at(i))->sp;
+	  
 	  return PyArray_Return(array);
 }
-
 
 
 nvector* nconvert_p2c(PyObject* parray)
@@ -89,7 +86,7 @@ nvector* nconvert_p2c(PyObject* parray)
 	return carray;
 }
 
-
+/*
 void connect_with_matrix(PyObject* from_, PyObject* to_, PyObject* con_)
 {
 	nvector* to = nconvert_p2c(to_);
@@ -117,7 +114,7 @@ void connect_one_to_many(PyObject* from_, PyObject* to_, double val)
 }
 
 
-
+*/
 /*
 	
 		THIS WORKS!!!! :) Please leave as this was the breaking-point

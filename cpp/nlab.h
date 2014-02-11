@@ -7,10 +7,8 @@
 
 
 // Create connections
-void connect(Neuron* from, nvector* to, double w);						// Create all-to-all connections with weight w.
-// void connect(std::vector<Neuron*> from, std::vector<Neuron*> to, double w);						// Create all-to-all connections with weight w.
-// void connect(std::vector<Neuron*> from, std::vector<Neuron*> to, std::vector<double> w);		// Create all-to-all connections with weights w.
-void connect(nvector* from, nvector* to,  ConMat* M);											// Create connections according to ConMat.
+void connect_one_to_many(Neuron* from, nvector* to, double w);			// Create all-to-all connections with weight w.
+void connect_with_matrix(nvector* from, nvector* to,  ConMat* M);		// Create connections according to ConMat.
 
 // Update a list of Neurons
 void stepNetwork(nvector* nlist, double dt);   // Solve for s
