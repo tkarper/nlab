@@ -9,7 +9,6 @@ Neuron::Neuron()
 	sp = 0.0;
 	s = 0.0;
 	I = 0.0;
-	std::cout << "Called ABST-constructor" << std::endl;
 }
 
 Neuron::~Neuron()
@@ -28,7 +27,6 @@ void Neuron::connect(Neuron* n1, double val)
 
 Neuron_IF::Neuron_IF()
 {
-	std::cout << "Called IF-constructor" << std::endl;
 }
 
 Neuron_IF::~Neuron_IF()
@@ -48,7 +46,7 @@ void Neuron_IF::step(double dt, double inp)
 		ip += weight->at(n)*(nr->sp);
 	}
 	
-	s = (1.0 - dt)*sp + fmax(ip + I + inp,0.0);
+	s = (1.0 - dt)*sp + dt*fmax(ip + I + inp,0.0);
 }
 
 

@@ -59,7 +59,7 @@ void connect_with_matrix(nvector* from, nvector* to,  ConMat* M)
 			ix = A->at(n)->at(m);
 			frm = from->at(ix);
 			tm = to->at(n);
-			tm->connect(frm, 1.0);
+			tm->connect(frm, A->at(n)->at(m+1));
 		}
 			
 	
