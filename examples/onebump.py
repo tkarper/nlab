@@ -39,7 +39,7 @@ d = 0
 plt.ion()
 
 # MAIN TIMELOOP
-while(t < 1000):
+while(t < 100):
 	t= t+dt
 	m= m+1
 	stepNetwork(Strip, dt)  # Perform time-step in Strip cells
@@ -47,7 +47,7 @@ while(t < 1000):
 	ll = get_spike_rates(Left)
 	rr = get_spike_rates(Right)
 	
-	if(m%20 == 0):
+	if(m%4 == 0):
 		plt.clf()
 		plt.plot(ll)
 		plt.plot(rr)
@@ -57,7 +57,7 @@ while(t < 1000):
 		
 	if(m==80):
 		Head[0].sp = 1.0
-	if(m== 4000):
+	if(m==1000):
 		Head[1].sp = 1.0
 		Head[0].sp = 0.0
 		

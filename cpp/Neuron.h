@@ -19,8 +19,8 @@ public:
 	virtual ~Neuron();
 
 	virtual void step(double dt, double input_){}	  // step using time-step dt with extra input
-	virtual void step(double dt){}				  // step using time-step dt with extra input
-	void update(){sp = s;}						  // goes without saying
+	virtual void step(double dt){}				  	// step using time-step dt with extra input
+	virtual void update() { sp = s; }					  // goes without saying
 	void connect(Neuron* n1, double val);		  // make a new connection to neuron n1 with strength val
 	std::vector<Neuron*>*	 getConnections(){return con;}
 
