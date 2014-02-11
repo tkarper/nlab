@@ -1,0 +1,16 @@
+COMPILING:
+----------------
+
+To compile the code with output in the current (base) folder:
+	> python setup.py build_ext --inplace
+
+If you instead run
+	> python setup.py build_ext
+then, a build structure is produced.
+
+
+Install:
+--------
+	> python setup.py install
+
+
