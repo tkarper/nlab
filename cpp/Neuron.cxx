@@ -6,6 +6,10 @@ Neuron::Neuron()
 {
 	con 	= new nvector();
 	weight	= new dvector();
+	sp = 0.0;
+	s = 0.0;
+	I = 0.0;
+	std::cout << "Called ABST-constructor" << std::endl;
 }
 
 Neuron::~Neuron()
@@ -22,9 +26,9 @@ void Neuron::connect(Neuron* n1, double val)
 }
 
 
-Neuron_IF::Neuron_IF(): Neuron()
+Neuron_IF::Neuron_IF()
 {
-	
+	std::cout << "Called IF-constructor" << std::endl;
 }
 
 Neuron_IF::~Neuron_IF()

@@ -14,7 +14,7 @@ if (f =='Darwin'):
 	print 'OSX Identitfied'
 	ext = ['']
 	lib = 0
-	swg = ['-c++', '-I./cpp/']
+	swg = ['-c++', '-I./cpp/', '-Wall']
 	incd= [numpy.get_include(), './cpp/']
 	lbdir = 0
 	xtc = ['-O3']

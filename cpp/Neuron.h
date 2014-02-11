@@ -2,8 +2,6 @@
 #define NEURON_INC
 #include <vector>
 
-
-
 class Neuron
 {
 protected:
@@ -34,7 +32,6 @@ public:
 		SIMPLE INTEGRATE-AND-FIRE NEURON MODEL
 	
 */
-
 class Neuron_IF: public Neuron
 {
 	
