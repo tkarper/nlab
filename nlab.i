@@ -10,6 +10,7 @@
 	#include <numpy/arrayobject.h>
 	#include <iostream>
     #include "Neuron.h"
+    #include "Neuron_ML.h"
     #include "nlab.h"
     #include "ConMat.h"
 %}
@@ -46,6 +47,7 @@
 }
 
 %include "Neuron.h"
+%include "Neuron_ML.h"
 %include "ConMat.h"
 %include "nlab.h"
 
@@ -58,7 +60,7 @@ PyObject* get_spike_rates(nvector* nr)
       npy_size[0] = (npy_intp) nr->size();
 	  PyArrayObject* array =  (PyArrayObject*) PyArray_SimpleNew(1, npy_size, NPY_DOUBLE); 
 	  double * rr = (double*) PyArray_DATA(array);
-	  for(int i =0;i< nr->size(); i++)
+	  for(size_t i=0; i<nr->size(); i++)
 	 	 rr[i] = (nr->at(i))->sp;
 	  
 	  return PyArray_Return(array);
@@ -71,7 +73,6 @@ nvector* nconvert_p2c(PyObject* parray)
 	PyObject** list = (PyObject**) PyArray_DATA(arr);
 	int n = PyArray_DIM(arr, 0);
 	void* vptr = 0;
-	Neuron* nr = 0;
 
 	nvector* carray = new nvector();
 	carray->reserve(n);
@@ -79,7 +80,7 @@ nvector* nconvert_p2c(PyObject* parray)
 	for(int i =0;i< n; i++)
 	{
 		SWIG_ConvertPtr(list[i], &vptr, SWIGTYPE_p_Neuron, 0);
-		nr = (Neuron*) vptr;
+		Neuron* nr = (Neuron*) vptr;
 		carray->push_back(nr);
 	}
 	
@@ -98,7 +99,6 @@ void connect_with_matrix(PyObject* from_, PyObject* to_, PyObject* con_)
 	con = (ConMat*) vptr;
 	
 	connect(from,to,con);
-	
 }
 
 void connect_one_to_many(PyObject* from_, PyObject* to_, double val)
@@ -106,9 +106,8 @@ void connect_one_to_many(PyObject* from_, PyObject* to_, double val)
 	nvector* to = nconvert_p2c(to_);
 	
 	void* vptr = 0;
-	Neuron* from = 0;
 	SWIG_ConvertPtr(from_, &vptr, SWIGTYPE_p_Neuron, 0);
-	from = (Neuron*) vptr;
+	Neuron* from = (Neuron*) vptr;
 	
 	connect(from,to,val);
 }
@@ -124,17 +123,14 @@ void connect_one_to_many(PyObject* from_, PyObject* to_, double val)
 void mongo(PyObject* inn)
 {
 	PyArrayObject* arr = (PyArrayObject*) PyArray_FROM_O(inn);
-	void* vptr = 0;
-	Neuron* nr = 0;
 	PyObject** list = (PyObject**) PyArray_DATA(arr);
 
 	for(int i =0;i< PyArray_DIM(arr,0); i++)
 	{
+		void* vptr = 0;
 		SWIG_ConvertPtr(list[i], &vptr, SWIGTYPE_p_Neuron, 0);
-		nr = (Neuron*) vptr;
+		Neuron* nr = (Neuron*) vptr;
 	}
-		
-	
 }
 
 

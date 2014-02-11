@@ -16,20 +16,16 @@ ConMat::~ConMat()
 ConMat::ConMat(int n, int m)
 {		
 	W = new ddvector(n);
-	for(int i = 0;i<n;i++)
+	for(int i=0; i<n; i++)
 	{
 		W->at(i) = new dvector();
-	}
-		
-	
-		
-	
+	}	
 }
 
 
 void ConMat::add(int i, int j, double alpha)
 {
-	if(i>=W->size())
+	if(static_cast<size_t>(i) >= W->size())
 	{
 		std::cout << "index exceeds size of ConMat"<< std::endl;
 		return;

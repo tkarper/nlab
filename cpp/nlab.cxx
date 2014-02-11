@@ -11,7 +11,7 @@
 void stepNetwork(nvector* nlist, double dt)
 {
 	Neuron* nr;
-	for(int n= 0;n<nlist->size();n++)
+	for(size_t n=0; n<nlist->size(); n++)
 	{
 		nr = nlist->at(n);
 		nr->step(0.1);
@@ -21,9 +21,8 @@ void stepNetwork(nvector* nlist, double dt)
 
 void updateNetwork(nvector* nlist)
 {
-	for(int n= 0;n<nlist->size();n++)
+	for(size_t n=0; n<nlist->size(); n++)
 		(nlist->at(n))->update();
-	
 }
 
 
@@ -36,10 +35,9 @@ void updateNetwork(nvector* nlist)
 */
 void connect_one_to_many(Neuron* from, nvector* to, double w)	
 {
-	Neuron* nr;
-	for(int j=0;j<to->size();j++)
+	for(size_t j=0; j<to->size(); j++)
 	{
-		nr = to->at(j);
+		Neuron* nr = to->at(j);
 		nr->connect(from, w);	
 	}
 		
@@ -48,21 +46,17 @@ void connect_one_to_many(Neuron* from, nvector* to, double w)
 
 void connect_with_matrix(nvector* from, nvector* to,  ConMat* M)
 {
-	int ix;
-	Neuron* frm; 
-	Neuron* tm;
-	ddvector* A;
-	for(int n=0;n<M->W->size(); n++)
-		for(int m = 0;m<M->W->at(n)->size()-1; m+=2)
+	for(size_t n=0; n<M->W->size(); n++)
+	{
+		for(size_t m=0; m<M->W->at(n)->size()-1; m+=2)
 		{
-			A = M->W;
-			ix = A->at(n)->at(m);
-			frm = from->at(ix);
-			tm = to->at(n);
+			ddvector* A = M->W;
+			int ix = A->at(n)->at(m);
+			Neuron* frm = from->at(ix);
+			Neuron* tm = to->at(n);
 			tm->connect(frm, A->at(n)->at(m+1));
 		}
-			
-	
+	}
 }
 
 

@@ -15,8 +15,7 @@ public:
 	// Model parameters, common to all neurons of this class
 	static double phi, gCa, V3, V4, ECa, EK, EL, gK, gL, V1, V2, CM;
 	
-	Neuron_IF();
-	~Neuron_IF();
+	Neuron_ML();
 	void step(double dt, double input_);
 	void step(double dt);
 	// Switch both s and n with the previous values
@@ -27,9 +26,9 @@ private:
 	double synPot(double input) { return fmax(input, 0.0); }
 
 	// Functions appearing in the model
-	double mInf(V) { (1+tanh((V-V1)/V2))/2; }
-	double tauN(V) { 1 / cosh((V-V3)/(2*V4)); }
-	double nInf(V) { (1 + tanh((V-V3)/V4))/2; }
+	double mInf(double V) { return (1+tanh((V-V1)/V2))/2; }
+	double tauN(double V) { return 1 / cosh((V-V3)/(2*V4)); }
+	double nInf(double V) { return (1 + tanh((V-V3)/V4))/2; }
 };
 
 

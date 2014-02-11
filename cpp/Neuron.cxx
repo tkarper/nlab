@@ -40,7 +40,7 @@ void Neuron_IF::step(double dt, double inp)
 {
 	double ip=0.0;
 	Neuron * nr;
-	for(int n =0; n< con->size();n++)
+	for(size_t n=0; n<con->size(); n++)
 	{
 		nr = con->at(n);
 		ip += weight->at(n)*(nr->sp);
