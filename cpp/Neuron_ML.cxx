@@ -1,4 +1,5 @@
 #include "Neuron_ML.h"
+#include <iostream>
 
 
 // Set model parameters (could be done in Python script)
@@ -20,6 +21,8 @@ double Neuron_ML::CM = 20;
 Neuron_ML::Neuron_ML() :
 n(0), np(0)
 {
+	s = EL;
+	sp = EL;
 }
 
 
@@ -27,14 +30,14 @@ void Neuron_ML::step(double dt, double inp)
 {
 	// Compute input (synaptic potentials) coming from other neurons
 	double ip = 0.0;
-	for(int n=0; n<con->size(); n++)
+	for(size_t i=0; i<con->size(); i++)
 	{
-		Neuron* nr = con->at(n);
-		ip += weight->at(n) * synPot(nr->sp);
+		Neuron* nr = con->at(i);
+		ip += weight->at(i) * synPot(nr->sp);
 	}
 	
-	s = sp - dt*((gL*(sp-EL) + gK*np*(sp-EK) + gCa*mInf(sp)*(sp-ECa)))/CM;
-	n = np + dt*phi*(nInf(sp)-np)/tauN(sp)];
+	s = sp + dt*(I + ip + inp - (gL*(sp-EL) + gK*np*(sp-EK) + gCa*mInf(sp)*(sp-ECa)))/CM;
+	n = np + dt*phi*(nInf(sp)-np)/tauN(sp);
 }
 
 

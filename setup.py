@@ -29,6 +29,7 @@ else:
 
 nlab_module = Extension('_nlab',
                            sources=['cpp/Neuron.cxx',
+                           			'cpp/Neuron_ML.cxx',
 						   			'cpp/nlab.cxx',
 						   			'cpp/ConMat.cxx',
 									'nlab.i'],

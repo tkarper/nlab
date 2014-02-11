@@ -5,16 +5,16 @@ from numpy import *
 from nlab import *
 import matplotlib.pyplot as plt
 
-NStrip = 2**8
+NStrip = 2**5
 dt = 0.1
 
 alpha = 0.1
 l  = 3
-W0 = -0.5
-I = 1.0
+W0 = -5.0
+I = 10.0
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
-Strip = array([Neuron_IF() for _ in range(0,2*NStrip)])		# The Strip cells
+Strip = array([Neuron_ML() for _ in range(0,2*NStrip)])		# The Strip cells
 Right = Strip[0:NStrip]	
 Left  = Strip[NStrip:2*NStrip]
 
@@ -29,8 +29,10 @@ connect_with_matrix(Strip, Strip, M) 	# Apply the connection matrix to the Strip
 
 
 # INITIAL CONDITIONS
-Right[NStrip/2].sp = 1.0
-Left[NStrip/2].sp  = 1.0
+Right[NStrip/2].sp = 0.0
+Right[NStrip/2].np = 0.0
+Left[NStrip/2].sp  = 0.0
+Left[NStrip/2].np = 0.0
 
 
 t= 0
@@ -41,16 +43,16 @@ plt.ion()
 # MAIN TIMELOOP
 while(t < 100):
 	t= t+dt
-	m= m+1
 	stepNetwork(Strip, dt)  # Perform time-step in Strip cells
 	updateNetwork(Strip)	# Update Neuron.sp = Neuron.s
 	ll = get_spike_rates(Left)
 	rr = get_spike_rates(Right)
 	
-	if(m%4 == 0):
+	if(m%20 == 0):
 		plt.clf()
 		plt.plot(ll)
 		plt.plot(rr)
+		plt.ylim((-80, 50))
 		plt.draw()
 		#plt.savefig('./fig/%d.png'%d)
 		d= d+1
@@ -60,5 +62,7 @@ while(t < 100):
 	if(m==1000):
 		Head[1].sp = 1.0
 		Head[0].sp = 0.0
+	
+	m= m+1
 		
 	
