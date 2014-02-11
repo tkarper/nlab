@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 NStrip = 2**5
 dt = 0.1
 
-alpha = 0.1
+alpha = 1.0
 l  = 3
-W0 = -5.0
-I = 10.0
+W0 = -6.0
+I = 3.0
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
 Strip = array([Neuron_ML() for _ in range(0,2*NStrip)])		# The Strip cells
@@ -29,10 +29,11 @@ connect_with_matrix(Strip, Strip, M) 	# Apply the connection matrix to the Strip
 
 
 # INITIAL CONDITIONS
-Right[NStrip/2].sp = 0.0
-Right[NStrip/2].np = 0.0
-Left[NStrip/2].sp  = 0.0
-Left[NStrip/2].np = 0.0
+for i in range(NStrip/2, NStrip/2+l):
+	Right[i].sp = 0.0
+	Right[i].np = 0.0
+	Left[i].sp  = 0.0
+	Left[i].np = 0.0
 
 
 t= 0
