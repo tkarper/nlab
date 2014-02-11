@@ -34,7 +34,7 @@ void Neuron_ML::step(double dt, double inp)
 	}
 	
 	s = sp - dt*((gL*(sp-EL) + gK*np*(sp-EK) + gCa*mInf(sp)*(sp-ECa)))/CM;
-	n = np + dt*phi*(nInf(sp)-np)/tauN(sp)];
+	n = np + dt*phi*(nInf(sp)-np)/tauN(sp);
 }
 
 

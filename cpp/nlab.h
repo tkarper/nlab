@@ -25,7 +25,18 @@ void updateNetwork(nvector* nlist);			   // sp = s
 	s2 - Neurons connected to h2
 	weight - goes without saying
 */
-ConMat* stripCell_onebump(nvector* s1, nvector* s2, int l, double w);		
-//ConMat gcMat_Strips(Neuron** s1, Neuron** s2, double weight);
+#ifdef SWIG
+%feature("autodoc","1");
+%feature("docstring") "Create one-bump connectivity matrix for a strip cell network. 
+
+nvector* left   - Leftward pointing neurons (decreasing index)
+nvector* right  - Rightward pointing neurons (increasing index)
+int      l      - Size of region NOT inhibited by a Neuron 
+double   weight - The weight on each connection (should be NEGATIVE) 	 
+
+";
+#endif
+ConMat* strip_matrix_OneBump(nvector* left, nvector* right, int l, double w);		
+
 
 #endif

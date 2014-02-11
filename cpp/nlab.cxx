@@ -70,7 +70,7 @@ void connect_with_matrix(nvector* from, nvector* to,  ConMat* M)
 
 */
 
-ConMat* stripCell_onebump(nvector* s1, nvector* s2, int l, double w)
+ConMat* strip_matrix_OneBump(nvector* s1, nvector* s2, int l, double w)
 {
 	int num_neuro = s1->size();
 	ConMat* M = new ConMat(2*s1->size(), 2*s2->size());
