@@ -21,7 +21,7 @@ if (f =='Darwin'):
 else:
 	print 'Assuming Linux'
 	ext = 0
-	lib = ['']
+	lib = 0
 	swg = ['-c++',  '-I./cpp/']
 	incd= [numpy.get_include(), './cpp/']
 	lbdir = 0
