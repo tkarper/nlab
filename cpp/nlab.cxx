@@ -123,6 +123,57 @@ ConMat* gridcell_matrix_from_updrl(int num_in_strip)
 }
 
 
+ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
+{
+	double Xdir [4] = {0.0, 0.0, 1.0,-1.0};
+	double Ydir [4] = {1.0, -1.0, 0.0,0.0};
+	ConMat* M = new ConMat(4*num_neuro, 4*num_neuro);
+	
+	int N = (int) sqrt(num_neuro);
+	if(!PyCallable_Check(phi_p))
+	{
+		std::cout << "Python object phi_p is not callable" << std::endl;
+	}
+	
+	PyObject* pArgs = PyTuple_New(6);
+	for(int i = 0;i<N; i++)
+		for(int j =0;j<N; j++)
+	{
+		int to = i*N + j;
+
+		double x1 = j;
+		double y1 = i;
+		PyTuple_SetItem(pArgs, 0, PyFloat_FromDouble(x1));
+		PyTuple_SetItem(pArgs, 1, PyFloat_FromDouble(y1));
+		
+		for(int k=0;k<N;k++)
+			for(int l=0;l<N;l++)
+		{
+			int from = k*N + l;
+			double x2 = l;
+			double y2 = k;
+			
+			PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble(x2));
+			PyTuple_SetItem(pArgs, 3, PyFloat_FromDouble(y2));
+			
+			for(int r = 0;r<4;r++)
+				for(int s=0;s<4;s++)
+				{
+					PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble(Xdir[s]));
+					PyTuple_SetItem(pArgs, 5, PyFloat_FromDouble(Ydir[s]));
+	
+					double val = PyFloat_AsDouble(PyObject_CallObject(phi_p, pArgs));
+					if(val>0.0 && (to+r*num_neuro != from+s*num_neuro) )
+						M->add(to+r*num_neuro, from+s*num_neuro, val);		
+				} 		
+		}	
+	}
+	
+	Py_DECREF(pArgs);
+	
+	return M;
+}
+
 
 
 

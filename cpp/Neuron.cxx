@@ -13,7 +13,7 @@ Neuron::Neuron()
 
 Neuron::~Neuron()
 {
-	std::cout << "CALLED DESTRUCTOR" << std::endl;
+
 }
 
 
@@ -31,7 +31,7 @@ Neuron_IF::Neuron_IF()
 
 Neuron_IF::~Neuron_IF()
 {
-	std::cout << "CALLED IF's DESTRUCTOR" << std::endl;
+
 }
 
 

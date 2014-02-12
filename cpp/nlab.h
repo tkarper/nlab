@@ -1,6 +1,6 @@
 #ifndef NLAB_INC
 #define NLAB_INC
-
+#include <Python.h>
 #include <vector>
 #include "Neuron.h"
 #include "ConMat.h"
@@ -31,14 +31,21 @@ void updateNetwork(nvector* nlist);			   // sp = s
 num_neuro:	int 		 - Number of neurons in each strip (e.g num of left neurons) 
 l:		int              - Size of region NOT inhibited by a Neuron 
 weight:	double           - The weight on each connection (should be NEGATIVE) 	 
+	
+Returns connection Matrix of the form:
+
+M_ij = connection from Strip(j) to Strip(i)
+where Strip = [Left, Right]
 
 ";
 #endif
 ConMat* strip_matrix_OneBump(int num_neuro, int l, double w);		
 
+
 #ifdef SWIG
 %feature("autodoc","1");
 %feature("docstring") "Create a gridcell connectivity matrix from strip cells (Up, Down, Right, Left)
+
 Returning Connection Matrix of form:
 
 GridCell | Up  | Down  |  Right  | Left  |
@@ -52,6 +59,24 @@ GridCell | Up  | Down  |  Right  | Left  |
 ConMat* gridcell_matrix_from_updrl(int num_neuro_in_strip);
 
 
+
+#ifdef SWIG
+%feature("autodoc","1");
+%feature("docstring") "Create a gridcell connectivity matrix from phi(x,y,v)
+
+Returning Connection Matrix of form:
+
+GridCell    | Layer-Up  | Layer-Down  |  Layer-Right  | Layer-Left |
+--------------------------------------------------------------------
+Layer-Up    |           
+Layer-Down  |           
+Layer-Right |           
+Layer-Left  |
+	
+	";
+#endif
+//double (*phi(double x, double y, double u, double v))
+ConMat* gridcell_matrix_from_phi(int num_neuro_in_layer, PyObject* phi_p);
 
 
 
