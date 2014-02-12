@@ -123,56 +123,238 @@ ConMat* gridcell_matrix_from_updrl(int num_in_strip)
 }
 
 
-ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
+// A convenient wrapper for the process of calling a python function
+#ifdef SWIG
+%ignore phi(double, double, double, double, double, double, PyObject*);
+#endif
+double phi(double x1, double y1, double x2, double y2, double u, double v, PyObject* phi_p)
 {
-	double Xdir [4] = {0.0, 0.0, 1.0,-1.0};
-	double Ydir [4] = {1.0, -1.0, 0.0,0.0};
-	ConMat* M = new ConMat(4*num_neuro, 4*num_neuro);
-	
-	int N = (int) sqrt(num_neuro);
 	if(!PyCallable_Check(phi_p))
 	{
 		std::cout << "Python object phi_p is not callable" << std::endl;
 	}
-	
 	PyObject* pArgs = PyTuple_New(6);
-	for(int i = 0;i<N; i++)
-		for(int j =0;j<N; j++)
-	{
-		int to = i*N + j;
-
-		double x1 = j;
-		double y1 = i;
-		PyTuple_SetItem(pArgs, 0, PyFloat_FromDouble(x1));
-		PyTuple_SetItem(pArgs, 1, PyFloat_FromDouble(y1));
-		
-		for(int k=0;k<N;k++)
-			for(int l=0;l<N;l++)
-		{
-			int from = k*N + l;
-			double x2 = l;
-			double y2 = k;
-			
-			PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble(x2));
-			PyTuple_SetItem(pArgs, 3, PyFloat_FromDouble(y2));
-			
-			for(int r = 0;r<4;r++)
-				for(int s=0;s<4;s++)
-				{
-					PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble(Xdir[s]));
-					PyTuple_SetItem(pArgs, 5, PyFloat_FromDouble(Ydir[s]));
+	PyTuple_SetItem(pArgs, 0, PyFloat_FromDouble(x1));
+	PyTuple_SetItem(pArgs, 1, PyFloat_FromDouble(y1));
+	PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble(x2));
+	PyTuple_SetItem(pArgs, 3, PyFloat_FromDouble(y2));
+	PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble(u));
+	PyTuple_SetItem(pArgs, 5, PyFloat_FromDouble(v));
 	
-					double val = PyFloat_AsDouble(PyObject_CallObject(phi_p, pArgs));
-					if(val!=0.0 && (to+r*num_neuro != from+s*num_neuro) )
-						M->add(to+r*num_neuro, from+s*num_neuro, val);		
-				} 		
-		}	
+	double val = PyFloat_AsDouble(PyObject_CallObject(phi_p, pArgs));
+	Py_DECREF(pArgs);
+	
+	return val;
+}
+ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
+{
+	
+	int N = (int) sqrt(num_neuro);
+	
+	// Find relevant R and shift l 
+	double val = 2.0;
+	int mx =1;
+	while(fabs(val)>0.001 && mx < 100)
+	{
+		val = phi(0,0,mx,0,1.0,0.0,phi_p);
+		mx++;
+	}
+
+	
+	val = 2.0;
+	int Mx=1;
+	while(fabs(val)>0.001 && Mx < 100)
+	{
+		val = phi(0,0,Mx,0,0.0,0.0,phi_p);
+		Mx++;
 	}
 	
-	Py_DECREF(pArgs);
+	int Lx = fabs(Mx - mx);  // Shift in x direction
+	int Rx  = fmin(Mx, mx);  // Radius in x direction
+
+	val = 2.0;
+	int my=1;
+	while(fabs(val)>0.001 && my < 100)
+	{
+		val = phi(0,0,0,my,0.0,1.0,phi_p);
+		my++;
+	}
+	
+	val = 2.0;
+	int My=1;
+	while(fabs(val)>0.001 && My < 100)
+	{
+		val = phi(0,0,0,My,0.0,0.0,phi_p);
+		My++;
+	}
+	
+	int Ly = fabs(My - my);  // Shift in x direction
+	int Ry  = fmin(My, my);  // Radius in x direction
+	
+	std::cout << "R=" << Rx << " with shift l=" << Lx << std::endl;
+	std::cout << "R=" << Ry << " with shift l=" << Ly << std::endl;
+	
+
+	// Create a matrix holding the values
+	double** up = new double*[2*(Ry+Ly)];
+	double** down = new double*[2*(Ry+Ly)];
+	double** right = new double*[2*(Ry+Ly)];
+	double** left = new double*[2*(Ry+Ly)];
+	
+	for(int i =0;i<2*(Ry+Ly);i++)
+	{
+		up[i]    = new double[2*(Rx+Lx)];
+		down[i]  = new double[2*(Rx+Lx)];
+		right[i] = new double[2*(Rx+Lx)];
+		left[i]  = new double[2*(Rx+Lx)];
+		
+		for(int j=0;j<2*(Rx+Lx);j++)
+		{
+			double x2 = (i-Ry-Ly);
+			double y2 = (j-Rx-Lx);
+			
+			up[i][j]    = phi(0.0, 0.0, x2, y2,  0.0, 1.0,phi_p);
+			down[i][j]  = phi(0.0, 0.0, x2, y2,  0.0, -1.0,phi_p);
+			right[i][j] = phi(0.0, 0.0, x2, y2,  1.0, 0.0,phi_p);
+			left[i][j]  = phi(0.0, 0.0, x2, y2, -1.0, 0.0,phi_p);
+			
+		}
+		
+	}
+	
+	int sz = 2*(Rx+Lx)*(Rx+Lx) + 2*(Ry+Ly)*(Ry+Ly);
+	ConMat* M = new ConMat(4*num_neuro, sz);
+	
+	
+	
+	for(int i=0;i<N;i++)
+	{
+		std::cout << (100.0*i)/(N+0.0) << "%" << std::endl;
+		for(int j=0;j<N;j++)
+		{
+			int to_index = i*N + j;
+		
+			for(int k=1; k< 2*(Ly + Ry);k++)
+				for(int l=1; l< 2*(Lx + Rx);l++)
+			{
+				int j2 = j+l-(Ly+Ry);
+				int i2 = i+k-(Lx+Rx);
+				if(j2 < 0)
+					j2 += N;
+				if(j2 >= N)
+					j2 -= N;
+				if(i2 < 0)
+					i2 += N;
+				if(i2 >= N)
+					i2 -= N;
+			 
+				int from_index = i2*N + j2;
+			
+				// Add connections to up
+				if(to_index != from_index) 
+				M->add(to_index, from_index, up[k][l]);
+				M->add(to_index, from_index + num_neuro, down[k][l]);
+				M->add(to_index, from_index + 2*num_neuro, right[k][l]);
+				M->add(to_index, from_index + 3*num_neuro, left[k][l]);
+			
+				// Add connection to down
+				M->add(to_index+num_neuro, from_index, up[k][l]);
+				if(to_index != from_index) 
+				M->add(to_index+num_neuro, from_index + num_neuro, down[k][l]);
+				M->add(to_index+num_neuro, from_index + 2*num_neuro, right[k][l]);
+				M->add(to_index+num_neuro, from_index + 3*num_neuro, left[k][l]);
+
+				// Add connection to right
+				M->add(to_index+2*num_neuro, from_index, up[k][l]);
+				M->add(to_index+2*num_neuro, from_index + num_neuro, down[k][l]);
+				if(to_index != from_index)
+				M->add(to_index+2*num_neuro, from_index + 2*num_neuro, right[k][l]);
+				M->add(to_index+2*num_neuro, from_index + 3*num_neuro, left[k][l]);
+
+				// Add connections to left
+				M->add(to_index+3*num_neuro, from_index, up[k][l]);
+				M->add(to_index+3*num_neuro, from_index + num_neuro, down[k][l]);
+				M->add(to_index+3*num_neuro, from_index + 2*num_neuro, right[k][l]);
+				if(to_index != from_index)
+				M->add(to_index+3*num_neuro, from_index + 3*num_neuro, left[k][l]);
+
+			
+			}
+		
+		}
+	}
+	
+	for(int i=0;i< Ry+Ly;i++)
+	{
+		delete [] up[i];
+		delete [] down[i];
+		delete [] right[i];
+		delete [] left[i];
+	}
+	delete [] up;
+	delete [] down;
+	delete [] right;
+	delete [] left;
+
 	
 	return M;
 }
+// ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
+// {
+// 	
+// 	double Xdir [4] = {0.0, 0.0, 1.0,-1.0};
+// 	double Ydir [4] = {1.0, -1.0, 0.0,0.0};
+// 	int N = (int) sqrt(num_neuro);
+// 	
+// 	
+// 	
+// 	ConMat* M = new ConMat(4*num_neuro, N);
+// 	
+// 	
+// 	if(!PyCallable_Check(phi_p))
+// 	{
+// 		std::cout << "Python object phi_p is not callable" << std::endl;
+// 	}
+// 	
+// 	PyObject* pArgs = PyTuple_New(6);
+// 	for(int i = 0;i<N; i++)
+// 	{
+// 		std::cout << i*100.0/(N+0.0) << "%" << std::endl;
+// 		for(int j =0;j<N; j++)
+// 		{
+// 			int to = i*N + j;
+// 			double x1 = j;
+// 			double y1 = i;
+// 			PyTuple_SetItem(pArgs, 0, PyFloat_FromDouble(x1));
+// 			PyTuple_SetItem(pArgs, 1, PyFloat_FromDouble(y1));
+// 		
+// 			for(int k=0;k<N;k++)
+// 				for(int l=0;l<N;l++)
+// 			{
+// 				int from = k*N + l;
+// 				double x2 = l;
+// 				double y2 = k;
+// 			
+// 				PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble(x2));
+// 				PyTuple_SetItem(pArgs, 3, PyFloat_FromDouble(y2));
+// 			
+// 				for(int r = 0;r<4;r++)
+// 					for(int s=0;s<4;s++)
+// 					{
+// 						PyTuple_SetItem(pArgs, 4, PyFloat_FromDouble(Xdir[s]));
+// 						PyTuple_SetItem(pArgs, 5, PyFloat_FromDouble(Ydir[s]));
+// 	
+// 						double val = PyFloat_AsDouble(PyObject_CallObject(phi_p, pArgs));
+// 						if(val!=0.0 && (to+r*num_neuro != from+s*num_neuro) )
+// 							M->add(to+r*num_neuro, from+s*num_neuro, val);		
+// 					} 		
+// 			}	
+// 		}
+// 	}
+// 	Py_DECREF(pArgs);
+// 	
+// 	return M;
+// }
 
 
 
