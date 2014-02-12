@@ -75,7 +75,8 @@ Layer-Left  |
 	
 	";
 #endif
-//double (*phi(double x, double y, double u, double v))
+
+
 ConMat* gridcell_matrix_from_phi(int num_neuro_in_layer, PyObject* phi_p);
 
 

@@ -19,6 +19,7 @@ ConMat::ConMat(int n, int m)
 	for(int i=0; i<n; i++)
 	{
 		W->at(i) = new dvector();
+		W->at(i)->reserve(m);
 	}	
 }
 
