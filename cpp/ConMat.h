@@ -22,6 +22,22 @@ public:
 };
 
 
+typedef std::pair<int, double> NeuroConn;
+typedef std::vector<NeuroConn> cvector;
+typedef std::vector<cvector> ccvector;
+
+class ConMat2
+{
+public:
+	ddvector W;
+	ConMat2(size_t n);
+	ConMat2(size_t n, size_t m);
+	~ConMat2();
+
+	void add(size_t i, size_t j, double alpha);
+};
+
+
 
 
 #endif

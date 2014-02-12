@@ -18,8 +18,9 @@ double Neuron_HH::VT = 0;
 
 
 // Functions appearing in the model
-double alpha_n(double V) { return 0.01*(V+55)/(1 - exp(-(V+55)/10)+1E-10 ); }
-double alpha_m(double V) { return 0.1*(V+40)/(1 - exp(-(V+40)/10) +1E-10); }
+const double tol = 1e-10;
+double alpha_n(double V) { return (fabs(V+55)<tol) ? 0.1 : 0.01*(V+55)/(1 - exp(-(V+55)/10)); }
+double alpha_m(double V) { return (fabs(V+40)<tol) ? 1 : 0.1*(V+40)/(1 - exp(-(V+40)/10)); }
 double alpha_h(double V) { return 0.07*exp(-(V+65)/20); }
 double beta_n(double V) { return 0.125*exp(-(V+65)/80); }
 double beta_m(double V) { return 4*exp(-(V+65)/18); }
@@ -44,7 +45,7 @@ void Neuron_HH::step(double dt, double inp)
 		Neuron* nr = con->at(i);
 		ip += weight->at(i) * nr->sp;
 	}
-	
+//	std::cout << dt << "   " << I+inp+ip << std::endl;
 	V = Vp + dt*(I+inp+ip - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
 	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
 	m = mp + dt*phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp);

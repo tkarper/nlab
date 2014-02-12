@@ -34,3 +34,40 @@ void ConMat::add(int i, int j, double alpha)
 	W->at(i)->push_back(j);
 	W->at(i)->push_back(alpha);		
 }
+
+
+
+
+
+
+ConMat2::ConMat2(size_t n)
+{
+	ConMat(n, n);
+}
+
+
+ConMat2::ConMat2(size_t n, size_t m)
+{
+	W.resize(n);
+	for(int i=0; i<n; i++)
+	{
+		W[i].reserve(m);
+	}	
+}
+
+
+ConMat2::~ConMat2()
+{
+}
+
+
+void ConMat2::add(size_t i, size_t j, double alpha)
+{
+	if(i >= W.size() || j >= W[i].size())
+	{
+		std::cout << "index exceeds size of ConMat"<< std::endl;
+		return;
+	}
+	
+	W[i].push_back(NeuroConn(j, alpha));
+}

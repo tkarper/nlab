@@ -14,7 +14,7 @@ void stepNetwork(nvector* nlist, double dt)
 	for(size_t n=0; n<nlist->size(); n++)
 	{
 		nr = nlist->at(n);
-		nr->step(0.1);
+		nr->step(dt);
 	}
 		
 }
