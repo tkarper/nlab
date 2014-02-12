@@ -14,7 +14,7 @@ double Neuron_HH::EL = -54.4;
 double Neuron_HH::CM = 1;
 double Neuron_HH::alpha = 1;
 double Neuron_HH::beta = 1;
-double Neuron_HH::VT = -40;
+double Neuron_HH::VT = 0;
 
 
 // Functions appearing in the model
@@ -45,7 +45,7 @@ void Neuron_HH::step(double dt, double inp)
 		ip += weight->at(i) * nr->sp;
 	}
 	
-	V = Vp + dt*(I+inp+ip - ((gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa))))/CM;
+	V = Vp + dt*(I+inp+ip - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
 	n = np + dt*phi*(alpha_n(V)*(1-n) - beta_n(V)*n);
 	m = mp + dt*phi*(alpha_m(V)*(1-m) - beta_m(V)*m);
 	h = hp + dt*phi*(alpha_h(V)*(1-h) - beta_h(V)*h);

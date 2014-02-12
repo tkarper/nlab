@@ -82,23 +82,23 @@ ConMat* strip_matrix_OneBump(int num_neuro, int l, double w)
 			if(m == n)
 				continue;
 
-			double ix = m;
+			int ix = m;
 			if(m>=num_neuro)
 				ix = ix - num_neuro;	
 			
 		 	M->add(n,ix,w);
 			M->add(n+num_neuro, ix, w);
 			
-			double ix2 = 2*n - m;
+			int ix2 = 2*n - m;
 			if(ix2<0)
 				ix2 = ix2 + num_neuro;
 			
-			M->add(n,ix2+num_neuro, w);
-			M->add(n+num_neuro, ix2 + num_neuro, w);
+			M->add(n, ix2+num_neuro, w);
+			M->add(n+num_neuro, ix2+num_neuro, w);
 		}
 		
 		
-		M->add(n,n + num_neuro,w);
+		M->add(n, n+num_neuro, w);
 		M->add(n+num_neuro, n, w);
 	}
 	
@@ -112,13 +112,13 @@ ConMat* gridcell_matrix_from_updrl(int num_in_strip)
 	int ix;
 	for(int i = 0;i<num_in_strip; i++)
 		for(int j=0;j< num_in_strip;j++)
-	{
-		ix = i*num_in_strip + j;
-		M->add(ix, j                 , 1.0);	// up(j)
-		M->add(ix, j +   num_in_strip, 1.0);	// down(j) 
-		M->add(ix, i + 2*num_in_strip, 1.0); 	// right(i)
-		M->add(ix, i + 3*num_in_strip, 1.0);	// left(i)
-	}
+		{
+			ix = i*num_in_strip + j;
+			M->add(ix, j                 , 1.0);	// up(j)
+			M->add(ix, j +   num_in_strip, 1.0);	// down(j) 
+			M->add(ix, i + 2*num_in_strip, 1.0); 	// right(i)
+			M->add(ix, i + 3*num_in_strip, 1.0);	// left(i)
+		}
 	return M;
 }
 
