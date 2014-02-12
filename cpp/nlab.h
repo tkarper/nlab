@@ -38,7 +38,16 @@ ConMat* strip_matrix_OneBump(int num_neuro, int l, double w);
 
 #ifdef SWIG
 %feature("autodoc","1");
-%feature("docstring") "Create a gridcell connectivity matrix from strip cells (Up, Down, Right, Left)";
+%feature("docstring") "Create a gridcell connectivity matrix from strip cells (Up, Down, Right, Left)
+Returning Connection Matrix of form:
+
+GridCell | Up  | Down  |  Right  | Left  |
+-----------------------------------------
+	0   |
+	1   |	
+	2   |
+		
+	";
 #endif
 ConMat* gridcell_matrix_from_updrl(int num_neuro_in_strip);
 
