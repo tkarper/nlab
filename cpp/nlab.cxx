@@ -70,11 +70,10 @@ void connect_with_matrix(nvector* from, nvector* to,  ConMat* M)
 
 */
 
-ConMat* strip_matrix_OneBump(nvector* s1, nvector* s2, int l, double w)
+ConMat* strip_matrix_OneBump(int num_neuro, int l, double w)
 {
-	int num_neuro = s1->size();
-	ConMat* M = new ConMat(2*s1->size(), 2*s2->size());
-	
+
+	ConMat* M = new ConMat(2*num_neuro, 2*num_neuro);
 	for(int n=0; n< num_neuro; n++)
 	{
 		for(int m=n+l;m<n+num_neuro;m++)
@@ -107,7 +106,21 @@ ConMat* strip_matrix_OneBump(nvector* s1, nvector* s2, int l, double w)
 } 
 
 
-
+ConMat* gridcell_matrix_from_updrl(int num_in_strip)
+{
+	ConMat* M = new ConMat(num_in_strip*num_in_strip,num_in_strip);	
+	int ix;
+	for(int i = 0;i<num_in_strip; i++)
+		for(int j=0;j< num_in_strip;j++)
+	{
+		ix = i*num_in_strip + j;
+		M->add(ix, j,0.25);
+		M->add(ix, j,0.25);
+		M->add(ix, i,0.25);
+		M->add(ix, i,0.25);
+	}
+	return M;
+}
 
 
 

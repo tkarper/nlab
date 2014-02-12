@@ -28,15 +28,30 @@ void updateNetwork(nvector* nlist);			   // sp = s
 #ifdef SWIG
 %feature("autodoc","1");
 %feature("docstring") "Create one-bump connectivity matrix for a strip cell network. 
-
-nvector* left   - Leftward pointing neurons (decreasing index)
-nvector* right  - Rightward pointing neurons (increasing index)
-int      l      - Size of region NOT inhibited by a Neuron 
-double   weight - The weight on each connection (should be NEGATIVE) 	 
+num_neuro:	int 		 - Number of neurons in each strip (e.g num of left neurons) 
+l:		int              - Size of region NOT inhibited by a Neuron 
+weight:	double           - The weight on each connection (should be NEGATIVE) 	 
 
 ";
 #endif
-ConMat* strip_matrix_OneBump(nvector* left, nvector* right, int l, double w);		
+ConMat* strip_matrix_OneBump(int num_neuro, int l, double w);		
+
+#ifdef SWIG
+%feature("autodoc","1");
+%feature("docstring") "Create a gridcell connectivity matrix from strip cells (Up, Down, Right, Left)";
+#endif
+ConMat* gridcell_matrix_from_updrl(int num_neuro_in_strip);
+
+
+
+
+
+
+
+
+
+
+
 
 
 #endif
