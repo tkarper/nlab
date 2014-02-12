@@ -16,7 +16,7 @@ public:
 	// Model parameters, common to all neurons of this class
 	static double phi, gNa, gK, gL, ENa, EK, EL, CM, alpha, beta, VT;
 	
-	Neuron_ML();
+	Neuron_HH();
 	void step(double dt, double input_);
 	void step(double dt);
 	// Switch both s, V and n with the previous values

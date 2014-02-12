@@ -1,19 +1,20 @@
 #include <cmath>
-#include "Neuron_ML.h"
+#include <iostream>
+#include "Neuron_HH.h"
 
 
 // Set model parameters (could be done in Python script)
-double Neuron_ML::phi = 1;	% Temperature factor
-double Neuron_ML::gNa = 120;
-double Neuron_ML::gK = 36;
-double Neuron_ML::gL = 0.3;
-double Neuron_ML::ENa = 50;
-double Neuron_ML::EK = -77;
-double Neuron_ML::EL = -54.4;
-double Neuron_ML::CM = 1;
-double Neuron_ML::alpha = 1;
-double Neuron_ML::beta = 1;
-double Neuron_ML::VT = -40;
+double Neuron_HH::phi = 1;		// Temperature factor
+double Neuron_HH::gNa = 120;
+double Neuron_HH::gK = 36;
+double Neuron_HH::gL = 0.3;
+double Neuron_HH::ENa = 50;
+double Neuron_HH::EK = -77;
+double Neuron_HH::EL = -54.4;
+double Neuron_HH::CM = 1;
+double Neuron_HH::alpha = 1;
+double Neuron_HH::beta = 1;
+double Neuron_HH::VT = -40;
 
 
 // Functions appearing in the model
@@ -25,7 +26,7 @@ double beta_m(double V) { return 4*exp(-(V+65)/18); }
 double beta_h(double V) { return 1/(1+exp(-(V+35)/10)); }
 
 
-Neuron_ML::Neuron_ML() :
+Neuron_HH::Neuron_HH() :
 V(-65), Vp(-65),
 n(0.317), np(0.317), 
 m(0.053), mp(0.053),
@@ -34,14 +35,14 @@ h(0.6), hp(0.6)
 }
 
 
-void Neuron_ML::step(double dt, double inp)
+void Neuron_HH::step(double dt, double inp)
 {
 	// Compute input (synaptic potentials) coming from other neurons
 	double ip = 0.0;
-	for(int n=0; n<con->size(); n++)
+	for(size_t i=0; i<con->size(); i++)
 	{
-		Neuron* nr = con->at(n);
-		ip += weight->at(n) * nr->sp;
+		Neuron* nr = con->at(i);
+		ip += weight->at(i) * nr->sp;
 	}
 	
 	V = Vp + dt*(I+inp+ip - ((gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa))))/CM;
@@ -52,7 +53,7 @@ void Neuron_ML::step(double dt, double inp)
 }
 
 
-void Neuron_ML::step(double dt)
+void Neuron_HH::step(double dt)
 {
 	step(dt, 0.0);
 }

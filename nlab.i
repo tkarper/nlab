@@ -10,6 +10,7 @@
 	#include <numpy/arrayobject.h>
 	#include <iostream>
     #include "Neuron.h"
+    #include "Neuron_HH.h"
     #include "Neuron_ML.h"
     #include "nlab.h"
     #include "ConMat.h"
@@ -48,6 +49,7 @@
 
 %include "Neuron.h"
 %include "Neuron_ML.h"
+%include "Neuron_HH.h"
 %include "ConMat.h"
 %include "nlab.h"
 

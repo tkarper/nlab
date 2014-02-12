@@ -6,15 +6,15 @@ from nlab import *
 import matplotlib.pyplot as plt
 
 NStrip = 2**7
-dt = 0.02
+dt = 0.005
 
-alpha = 50.0
+alpha = 1.0
 l = 5
-W0 = -30.0
-I = 30.0
+W0 = -1.5
+I = 3.0
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
-Strip = array([Neuron_ML() for _ in range(0,2*NStrip)])		# The Strip cells
+Strip = array([Neuron_HH() for _ in range(0,2*NStrip)])		# The Strip cells
 Right = Strip[0:NStrip]	
 Left  = Strip[NStrip:2*NStrip]
 
@@ -24,17 +24,18 @@ for i in range(0,2*NStrip):
 connect_one_to_many(Head[0], Right, alpha)	# Connecting the Right neurons to the first Head cell
 connect_one_to_many(Head[1], Left, alpha)   # Connecting the Left neurons to the second Head cell
 
-M = stripCell_onebump(Left, Right, l,W0) 	# Create connection matrix for the Strip cell network
+M = strip_matrix_OneBump(NStrip, l, W0) 	# Create connection matrix for the Strip cell network
 connect_with_matrix(Strip, Strip, M) 	# Apply the connection matrix to the Stripcell network
 
 
 # INITIAL CONDITIONS
 for i in range(NStrip/2, NStrip/2+l):
-	Right[i].sp = 50.0
-	Right[i].np = 0.4
-	Left[i].sp  = 50.0
-	Left[i].np = 0.4
+	Right[i].Vp = 50.0
+	Left[i].Vp = 50.0
+	Right[i].sp = 0.9
+	Left[i].sp  = 0.9
 Head[0].sp = 1.0
+Head[1].sp = 0.0
 
 
 t= 0
@@ -55,7 +56,7 @@ while(t < 100):
 		plt.plot(ll)
 		plt.plot(rr)
 		plt.title('t=%f'%t)
-		plt.ylim((-80, 50))
+#		plt.ylim((-80, 50))
 		plt.draw()
 		#plt.savefig('./fig/%d.png'%d)
 		d= d+1

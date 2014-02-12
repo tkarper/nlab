@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include "Neuron_ML.h"
 
 
@@ -22,13 +23,14 @@ double Neuron_ML::beta = 1;
 
 
 // Functions appearing in the model
-double mInf(double V) { return (1+tanh((V-V1)/V2))/2; }
-double tauN(double V) { return 1 / cosh((V-V3)/(2*V4)); }
-double nInf(double V) { return (1 + tanh((V-V3)/V4))/2; }
+double mInf(double V) { return (1+tanh((V-Neuron_ML::V1)/Neuron_ML::V2))/2; }
+double tauN(double V) { return 1 / cosh((V-Neuron_ML::V3)/(2*Neuron_ML::V4)); }
+double nInf(double V) { return (1 + tanh((V-Neuron_ML::V3)/Neuron_ML::V4))/2; }
 
 
 Neuron_ML::Neuron_ML() :
-n(0), np(0), V(EL), Vp(EL)
+V(EL), Vp(EL),
+n(0), np(0)
 {
 }
 
@@ -37,10 +39,10 @@ void Neuron_ML::step(double dt, double inp)
 {
 	// Compute input (synaptic potentials) coming from other neurons
 	double ip = 0.0;
-	for(int n=0; n<con->size(); n++)
+	for(size_t i=0; i<con->size(); i++)
 	{
-		Neuron* nr = con->at(n);
-		ip += weight->at(n) * nr->sp;
+		Neuron* nr = con->at(i);
+		ip += weight->at(i) * nr->sp;
 	}
 	
 	V = Vp - dt*((gL*(Vp-EL) + gK*np*(Vp-EK) + gCa*mInf(Vp)*(Vp-ECa)))/CM;
