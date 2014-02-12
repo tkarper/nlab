@@ -20,7 +20,7 @@ public:
 	void step(double dt, double input_);
 	void step(double dt);
 	// Switch both s, V and n with the previous values
-	void update() { Neuron::update(); np = n; Vp = V; }
+	void update() { Neuron::update(); np = n; Vp = V; mp=m; hp=h;}
 };
 
 

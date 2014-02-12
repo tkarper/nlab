@@ -163,7 +163,7 @@ ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
 					PyTuple_SetItem(pArgs, 5, PyFloat_FromDouble(Ydir[s]));
 	
 					double val = PyFloat_AsDouble(PyObject_CallObject(phi_p, pArgs));
-					if(val>0.0 && (to+r*num_neuro != from+s*num_neuro) )
+					if(val!=0.0 && (to+r*num_neuro != from+s*num_neuro) )
 						M->add(to+r*num_neuro, from+s*num_neuro, val);		
 				} 		
 		}	
