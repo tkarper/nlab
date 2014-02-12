@@ -60,6 +60,22 @@ void connect_with_matrix(nvector* from, nvector* to,  ConMat* M)
 }
 
 
+void connect_with_matrix2(nvector* from, nvector* to, ConMat2* M)
+{
+	for(size_t n=0; n<M->W.size(); n++)
+	{
+		for(size_t m=0; m<M->W[n].size(); m++)
+		{
+			ccvector& A = M->W;
+			int ix = A[n][m].first;
+			Neuron* frm = from->at(ix);
+			Neuron* tm = to->at(n);
+			tm->connect(frm, A[n][m].second);
+		}
+	}
+}
+
+
 
 
 
@@ -103,7 +119,36 @@ ConMat* strip_matrix_OneBump(int num_neuro, int l, double w)
 	}
 	
 	return M;
-} 
+}
+
+
+ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w)
+{
+	ConMat2* M = new ConMat2(2*num_neuro, 2*num_neuro);
+	for(int n=0; n<num_neuro; n++)
+	{
+		for(int m=n+l; m<n+num_neuro; m++)
+		{
+			// Remove self-interaction
+			if(m == n)
+				continue;
+
+			int ix = m % num_neuro;
+		 	M->add(n,ix,w);
+			
+			int ix2 = 2*n - m;
+			if(ix2<0)
+				ix2 = ix2 + num_neuro;
+			
+			M->add(n, ix2+num_neuro, w);
+			M->add(n+num_neuro, ix2+num_neuro, w);
+		}
+		M->add(n, n+num_neuro, w);
+		M->add(n+num_neuro, n, w);
+	}
+	return M;
+}
+ 
 
 // Up, Down, Right, Left
 ConMat* gridcell_matrix_from_updrl(int num_in_strip)
@@ -163,7 +208,7 @@ ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
 	
 	val = 2.0;
 	int Mx=1;
-	while(fabs(val)>0.001 && Mx < 100)
+	while(fabs(val)>0.001 && Mx < 100)
 	{
 		val = phi(0,0,Mx,0,0.0,0.0,phi_p);
 		Mx++;
@@ -174,7 +219,7 @@ ConMat* gridcell_matrix_from_phi(int num_neuro, PyObject* phi_p)
 
 	val = 2.0;
 	int my=1;
-	while(fabs(val)>0.001 && my < 100)
+	while(fabs(val)>0.001 && my < 100)
 	{
 		val = phi(0,0,0,my,0.0,1.0,phi_p);
 		my++;

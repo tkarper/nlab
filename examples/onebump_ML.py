@@ -26,8 +26,8 @@ cvar.Neuron_HH_beta = 1
 connect_one_to_many(Head[0], Right, alpha)	# Connecting the Right neurons to the first Head cell
 connect_one_to_many(Head[1], Left, alpha)   # Connecting the Left neurons to the second Head cell
 
-M = strip_matrix_OneBump(NStrip, l, W0) 	# Create connection matrix for the Strip cell network
-connect_with_matrix(Strip, Strip, M) 	# Apply the connection matrix to the Stripcell network
+M = strip_matrix_OneBump2(NStrip, l, W0) 	# Create connection matrix for the Strip cell network
+connect_with_matrix2(Strip, Strip, M) 	# Apply the connection matrix to the Stripcell network
 
 
 # INITIAL CONDITIONS

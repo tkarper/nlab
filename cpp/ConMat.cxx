@@ -64,7 +64,7 @@ ConMat2::~ConMat2()
 
 void ConMat2::add(size_t i, size_t j, double alpha)
 {
-	if(i >= W.size() || j >= W[i].size())
+	if(i >= W.size() || j >= W[i].capacity())
 	{
 		std::cout << "index exceeds size of ConMat"<< std::endl;
 		return;

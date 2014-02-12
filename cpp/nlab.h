@@ -8,7 +8,8 @@
 
 // Create connections
 void connect_one_to_many(Neuron* from, nvector* to, double w);			// Create all-to-all connections with weight w.
-void connect_with_matrix(nvector* from, nvector* to,  ConMat* M);		// Create connections according to ConMat.
+void connect_with_matrix(nvector* from, nvector* to, ConMat* M);		// Create connections according to ConMat.
+void connect_with_matrix2(nvector* from, nvector* to, ConMat2* M);		// Create connections according to ConMat.
 
 // Update a list of Neurons
 void stepNetwork(nvector* nlist, double dt);   // Solve for s
@@ -39,7 +40,8 @@ where Strip = [Left, Right]
 
 ";
 #endif
-ConMat* strip_matrix_OneBump(int num_neuro, int l, double w);		
+ConMat* strip_matrix_OneBump(int num_neuro, int l, double w);
+ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w);
 
 
 #ifdef SWIG

@@ -1,6 +1,7 @@
 #ifndef CONMAT_INC
 #define CONMAT_INC
 #include <vector>
+#include <iostream>
 #include "Neuron.h"
 
 typedef std::vector<dvector*> ddvector;
@@ -29,7 +30,7 @@ typedef std::vector<cvector> ccvector;
 class ConMat2
 {
 public:
-	ddvector W;
+	ccvector W;
 	ConMat2(size_t n);
 	ConMat2(size_t n, size_t m);
 	~ConMat2();
