@@ -10,7 +10,7 @@ dt = 0.005
 
 alpha = 1.0
 l = 5
-W0 = -1.5
+W0 = -0.5
 I = 3.0
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
@@ -30,8 +30,8 @@ connect_with_matrix(Strip, Strip, M) 	# Apply the connection matrix to the Strip
 
 # INITIAL CONDITIONS
 for i in range(NStrip/2, NStrip/2+l):
-	Right[i].Vp = 50.0
-	Left[i].Vp = 50.0
+	Right[i].Vp = 10.0
+	Left[i].Vp = 10.0
 	Right[i].sp = 0.9
 	Left[i].sp  = 0.9
 Head[0].sp = 1.0
@@ -48,15 +48,15 @@ while(t < 100):
 	t= t+dt
 	stepNetwork(Strip, dt)  # Perform time-step in Strip cells
 	updateNetwork(Strip)	# Update Neuron.sp = Neuron.s
-	ll = get_spike_rates(Left)
-	rr = get_spike_rates(Right)
+	ll = get_neuron_entry(Left, "Vp")
+	rr = get_neuron_entry(Right, "Vp")
 	
 	if(m%20 == 0):
 		plt.clf()
 		plt.plot(ll)
 		plt.plot(rr)
 		plt.title('t=%f'%t)
-#		plt.ylim((-80, 50))
+		plt.ylim((-80, 50))
 		plt.draw()
 		#plt.savefig('./fig/%d.png'%d)
 		d= d+1

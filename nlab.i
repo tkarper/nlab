@@ -9,6 +9,7 @@
 %{
 	#include <numpy/arrayobject.h>
 	#include <iostream>
+	#include <string>
     #include "Neuron.h"
     #include "Neuron_HH.h"
     #include "Neuron_ML.h"
@@ -56,16 +57,29 @@
 
 %inline{
 
+
+PyObject* get_neuron_entry(nvector* nr, const char* vn)
+{
+	std::string varname = vn;
+	npy_intp* npy_size = new npy_intp[1];
+	npy_size[0] = (npy_intp) nr->size();
+	PyArrayObject* array =  (PyArrayObject*) PyArray_SimpleNew(1, npy_size, NPY_DOUBLE); 
+	double * rr = (double*) PyArray_DATA(array);
+	if (varname == "sp")
+		for(size_t i=0; i<nr->size(); i++)
+			rr[i] = (nr->at(i))->sp;
+	else if (varname == "Vp")
+		for(size_t i=0; i<nr->size(); i++)
+			rr[i] = dynamic_cast<Neuron_HH*>(nr->at(i))->Vp;
+	else
+		throw std::invalid_argument("In get_spike_rates: unrecognized varname " + varname);
+	return PyArray_Return(array);
+}
+
+
 PyObject* get_spike_rates(nvector* nr)
 {
-	  npy_intp* npy_size = new npy_intp[1];
-      npy_size[0] = (npy_intp) nr->size();
-	  PyArrayObject* array =  (PyArrayObject*) PyArray_SimpleNew(1, npy_size, NPY_DOUBLE); 
-	  double * rr = (double*) PyArray_DATA(array);
-	  for(size_t i=0; i<nr->size(); i++)
-	 	 rr[i] = (nr->at(i))->sp;
-	  
-	  return PyArray_Return(array);
+	return get_neuron_entry(nr, "sp");
 }
 
 
