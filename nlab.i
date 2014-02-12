@@ -71,6 +71,12 @@ PyObject* get_neuron_entry(nvector* nr, const char* vn)
 	else if (varname == "Vp")
 		for(size_t i=0; i<nr->size(); i++)
 			rr[i] = dynamic_cast<Neuron_HH*>(nr->at(i))->Vp;
+	else if (varname == "np")
+		for(size_t i=0; i<nr->size(); i++)
+			rr[i] = dynamic_cast<Neuron_HH*>(nr->at(i))->np;
+	else if (varname == "mp")
+		for(size_t i=0; i<nr->size(); i++)
+			rr[i] = dynamic_cast<Neuron_HH*>(nr->at(i))->mp;
 	else
 		throw std::invalid_argument("In get_spike_rates: unrecognized varname " + varname);
 	return PyArray_Return(array);
