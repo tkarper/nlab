@@ -12,6 +12,7 @@ alpha = 0.1
 l  = 3
 W0 = -0.5
 I = 1.0
+speed = 1.0
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
 Strip = array([Neuron_IF() for _ in range(0,2*NStrip)])		# The Strip cells
@@ -58,9 +59,9 @@ while(t < 1000):
 		d= d+1
 		
 	if(m==80):
-		Head[0].sp = 1.0
+		Head[0].sp = speed
 	if(m==1000):
-		Head[1].sp = 1.0
+		Head[1].sp = speed
 		Head[0].sp = 0.0
 		
 	
