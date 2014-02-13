@@ -133,12 +133,12 @@ ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w)
 			int iLeft = (n-m+num_neuro) % num_neuro;
 			// Avoid self-interaction
 			if(iRight != n) {
-				M->add(n, iRight, w);
-				M->add(n, iRight+num_neuro, w);
+				M->add(iRight, n, w);
+				M->add(iRight+num_neuro, n, w);
 			}
 			if(iLeft != n) {
-				M->add(n+num_neuro, iLeft, w);
-				M->add(n+num_neuro, iLeft+num_neuro, w);
+				M->add(iLeft, n+num_neuro, w);
+				M->add(iLeft+num_neuro, n+num_neuro, w);
 			}
 		}
 	}
