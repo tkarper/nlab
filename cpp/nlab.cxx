@@ -127,24 +127,20 @@ ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w)
 	ConMat2* M = new ConMat2(2*num_neuro, 2*num_neuro);
 	for(int n=0; n<num_neuro; n++)
 	{
-		for(int m=n+l; m<n+num_neuro; m++)
+		for(int m=l; m<num_neuro; m++)
 		{
-			// Remove self-interaction
-			if(m == n)
-				continue;
-
-			int ix = m % num_neuro;
-		 	M->add(n,ix,w);
-			
-			int ix2 = 2*n - m;
-			if(ix2<0)
-				ix2 = ix2 + num_neuro;
-			
-			M->add(n, ix2+num_neuro, w);
-			M->add(n+num_neuro, ix2+num_neuro, w);
+			int iRight = (n+m) % num_neuro;
+			int iLeft = (n-m+num_neuro) % num_neuro;
+			// Avoid self-interaction
+			if(iRight != n) {
+				M->add(n, iRight, w);
+				M->add(n, iRight+num_neuro, w);
+			}
+			if(iLeft != n) {
+				M->add(n+num_neuro, iLeft, w);
+				M->add(n+num_neuro, iLeft+num_neuro, w);
+			}
 		}
-		M->add(n, n+num_neuro, w);
-		M->add(n+num_neuro, n, w);
 	}
 	return M;
 }
