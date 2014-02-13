@@ -34,8 +34,8 @@ connect_with_matrix2(Strip, Strip, M) 	# Apply the connection matrix to the Stri
 for i in range(NStrip/2, NStrip/2+1):
 	Right[i].Vp = -0.0
 	Left[i].Vp = -0.0
-	Right[i].sp = 0.0
-	Left[i].sp  = 0.0
+#	Right[i].sp = 0.0
+#	Left[i].sp  = 0.0
 Head[0].sp = 1.0
 Head[1].sp = 0.0
 
@@ -69,7 +69,7 @@ while(t < 200):
 	# if(m==80):
 	# 	Head[0].sp = 1.0
 	if(abs(t-50) < dt):
-		Head[1].sp = 1.0
 		Head[0].sp = 0.0
+		Head[1].sp = 1.0
 	
 	m= m+1
