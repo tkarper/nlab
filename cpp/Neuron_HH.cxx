@@ -25,6 +25,7 @@ double alpha_h(double V) { return 0.07*exp(-(V+65)/20); }
 double beta_n(double V) { return 0.125*exp(-(V+65)/80); }
 double beta_m(double V) { return 4*exp(-(V+65)/18); }
 double beta_h(double V) { return 1/(1+exp(-(V+35)/10)); }
+int heaviside(double V) { return V > 0 ? 1 : 0; }
 
 
 Neuron_HH::Neuron_HH() :
@@ -50,7 +51,7 @@ void Neuron_HH::step(double dt, double inp)
 	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
 	m = mp + dt*phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp);
 	h = hp + dt*phi*(alpha_h(Vp)*(1-hp) - beta_h(Vp)*hp);
-	s = sp + dt*(alpha*(1-sp)*fmax(Vp - VT, 0) - beta*sp);
+	s = sp + dt*(alpha*(1-sp)*heaviside(Vp - VT) - beta*sp);
 }
 
 

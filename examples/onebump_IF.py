@@ -5,7 +5,7 @@ from numpy import *
 from nlab import *
 import matplotlib.pyplot as plt
 
-NStrip = 2**6
+NStrip = 2**4
 dt = 0.1
 
 alpha = 0.1
@@ -37,10 +37,11 @@ Left[NStrip/2].sp  = 1.0
 t= 0
 m = 0
 d = 0
+plt.figure()
 plt.ion()
 
 # MAIN TIMELOOP
-while(t < 1000):
+while(t < 100):
 	t= t+dt
 	m= m+1
 	stepNetwork(Strip, dt)  # Perform time-step in Strip cells

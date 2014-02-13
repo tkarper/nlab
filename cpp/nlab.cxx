@@ -1,5 +1,6 @@
-#include "nlab.h"
 #include <iostream>
+#include <stdexcept>
+#include "nlab.h"
 
 /*
 	*********	UPDATE ROUTINES	*************
@@ -124,6 +125,9 @@ ConMat* strip_matrix_OneBump(int num_neuro, int l, double w)
 
 ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w)
 {
+	if (l < 0 || l >= num_neuro)
+		throw std::invalid_argument("in strip_matrix_OneBump2(): parameter l must lie between 0 and num_neuro-1");
+		
 	ConMat2* M = new ConMat2(2*num_neuro, 2*num_neuro);
 	for(int n=0; n<num_neuro; n++)
 	{
@@ -141,6 +145,9 @@ ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w)
 				M->add(iLeft+num_neuro, n+num_neuro, w);
 			}
 		}
+		// Add connection between opposing neurons
+		M->add(n, n+num_neuro, w);
+		M->add(n+num_neuro, n, w);
 	}
 	return M;
 }
