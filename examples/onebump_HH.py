@@ -8,10 +8,10 @@ import matplotlib.pyplot as plt
 NStrip = 2**6
 dt = 0.005
 
-alpha = 4.0
+alpha = 0.4
 l = 10
-W0 = -5.0
-I = 1.0
+W0 = -1.0
+I = 0.1
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
 Strip = array([Neuron_HH() for _ in range(0,2*NStrip)])		# The Strip cells
@@ -70,7 +70,7 @@ while(t < 200):
 	# if(m==80):
 	# 	Head[0].sp = 1.0
 	if(abs(t-50) < dt):
-		Head[1].sp = 1.0
 		Head[0].sp = 0.0
+		Head[1].sp = 1.0
 	
 	m= m+1

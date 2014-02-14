@@ -47,10 +47,11 @@ void Neuron_HH::step(double dt, double inp)
 		Neuron* nr = con->at(i);
 		ip += weight->at(i) * nr->sp;
 	}
-//	std::cout << dt << "   " << I+inp+ip << std::endl;
-	V = Vp + dt*(I+inp+ip - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
+
+	V = Vp + dt*(/*I+inp+ip*/ - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
 	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
-	m = mp + dt*phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp);
+	// Signals are summed up in the Na+ gate variable
+	m = mp + dt*(I+inp+ip + phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp));
 	h = hp + dt*phi*(alpha_h(Vp)*(1-hp) - beta_h(Vp)*hp);
 //	s = sp + dt*(alpha*(1-sp)*heaviside(Vp - VT) - beta*sp);
 	s = sp + dt*phi*(alpha*fmax(Vp-VT,0)/(VM-VT) - beta*sp);
