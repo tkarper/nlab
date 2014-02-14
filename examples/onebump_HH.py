@@ -5,12 +5,12 @@ from numpy import *
 from nlab import *
 import matplotlib.pyplot as plt
 
-NStrip = 2**4
+NStrip = 2**6
 dt = 0.005
 
-alpha = 5.0
-l = 3
-W0 = -7.0
+alpha = 4.0
+l = 10
+W0 = -5.0
 I = 1.0
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
@@ -20,8 +20,9 @@ Left  = Strip[NStrip:2*NStrip]
 
 for i in range(0,2*NStrip):
 	Strip[i].I = I
-cvar.Neuron_HH_VT = -40
-cvar.Neuron_HH_beta = 1
+cvar.Neuron_HH_VT = 0
+cvar.Neuron_HH_alpha = 1
+cvar.Neuron_HH_beta = 0.4
 
 connect_one_to_many(Head[0], Right, alpha)	# Connecting the Right neurons to the first Head cell
 connect_one_to_many(Head[1], Left, alpha)   # Connecting the Left neurons to the second Head cell
@@ -34,8 +35,8 @@ connect_with_matrix2(Strip, Strip, M) 	# Apply the connection matrix to the Stri
 for i in range(NStrip/2, NStrip/2+1):
 	Right[i].Vp = -0.0
 	Left[i].Vp = -0.0
-	Right[i].sp = 0.0
-	Left[i].sp  = 0.0
+#	Right[i].sp = 1.0
+#	Left[i].sp  = 1.0
 Head[0].sp = 1.0
 Head[1].sp = 0.0
 
@@ -58,8 +59,8 @@ while(t < 200):
 	
 	if(m%40 == 0):
 		plt.clf()
-		plt.plot(ll)
-		plt.plot(rr)
+		plt.plot(ll, '-o')
+		plt.plot(rr, '-s')
 		plt.title('t=%f'%t)
 		plt.ylim(yaxis)
 		plt.draw()

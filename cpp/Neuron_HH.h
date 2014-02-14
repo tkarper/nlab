@@ -14,7 +14,7 @@ public:
 	double m, mp;	// Na+ channel activation
 	double h, hp;	// Na+ channel deactivation
 	// Model parameters, common to all neurons of this class
-	static double phi, gNa, gK, gL, ENa, EK, EL, CM, alpha, beta, VT;
+	static double phi, gNa, gK, gL, ENa, EK, EL, CM, alpha, beta, VT, VM;
 	
 	Neuron_HH();
 	void step(double dt, double input_);
