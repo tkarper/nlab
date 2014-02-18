@@ -38,21 +38,38 @@ h(0.6), hp(0.6)
 }
 
 
-void Neuron_HH::step(double t, double dt, double inp)
+void Neuron_HH::step(double t, double dt, double input)
 {
 	// Compute input (synaptic potentials) coming from other neurons
-	double ip = 0.0;
+	double ipPos = 0, ipNeg = 0;
 	for(size_t i=0; i<con->size(); i++)
 	{
 		Neuron* nr = con->at(i);
-		ip += weight->at(i) * nr->sp;
+		double signal = weight->at(i) * nr->sp;
+		if (signal > 0)
+			ipPos += signal;
+		else
+			ipNeg -= signal;
 	}
+	if (I > 0)
+		ipPos += I;
+	else
+		ipNeg -= I;
+	if (input > 0)
+		ipPos += input;
+	else
+		ipNeg -= input;
 
-	V = Vp + dt*(/*I+inp+ip*/ - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
-	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
-	// Signals are summed up in the Na+ gate variable
-	m = mp + dt*(I+inp+ip + phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp));
+//	double ip = ipPos - ipNeg;
+//	V = Vp + dt*(ip - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
+//	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
+//	m = mp + dt*phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp);
+
+	V = Vp + dt*(-(gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
+	n = np + dt*phi*((ipNeg + alpha_n(Vp))*(1-np) - beta_n(Vp)*np);
+	m = mp + dt*phi*((ipPos + alpha_m(Vp))*(1-mp) - beta_m(Vp)*mp);
 	h = hp + dt*phi*(alpha_h(Vp)*(1-hp) - beta_h(Vp)*hp);
+
 //	s = sp + dt*(alpha*(1-sp)*heaviside(Vp - VT) - beta*sp);
 	s = sp + dt*phi*(alpha*fmax(Vp-VT,0)/(VM-VT) - beta*sp);
 }
