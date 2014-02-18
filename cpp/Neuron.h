@@ -18,8 +18,8 @@ public:
 	Neuron();
 	virtual ~Neuron();
 
-	virtual void step(double dt, double input_){}	  // step using time-step dt with extra input
-	virtual void step(double dt){}				  	// step using time-step dt with extra input
+	virtual void step(double t, double dt, double input) {}		// step using time-step dt with extra input
+	void step(double t, double dt) { step(t, dt, 0.0); }	// step using time-step dt without extra input
 	virtual void update() { sp = s; }					  // goes without saying
 	void connect(Neuron* n1, double val);		  // make a new connection to neuron n1 with strength val
 	std::vector<Neuron*>*	 getConnections(){return con;}
@@ -38,11 +38,9 @@ class Neuron_IF: public Neuron
 public:
 	Neuron_IF();
 	~Neuron_IF();
-	void step(double dt, double input_);
-	void step(double dt);
-	
-	
+	void step(double t, double dt, double input);
 };
+
 
 typedef std::vector<Neuron*> nvector;
 typedef std::vector<double> dvector;

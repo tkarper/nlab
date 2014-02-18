@@ -17,8 +17,7 @@ public:
 	static double phi, gNa, gK, gL, ENa, EK, EL, CM, alpha, beta, VT, VM;
 	
 	Neuron_HH();
-	void step(double dt, double input_);
-	void step(double dt);
+	void step(double t, double dt, double input_);
 	// Switch both s, V and n with the previous values
 	void update() { Neuron::update(); np = n; Vp = V; mp=m; hp=h;}
 };

@@ -35,7 +35,7 @@ n(0), np(0)
 }
 
 
-void Neuron_ML::step(double dt, double inp)
+void Neuron_ML::step(double t, double dt, double inp)
 {
 	// Compute input (synaptic potentials) coming from other neurons
 	double ip = 0.0;
@@ -48,10 +48,4 @@ void Neuron_ML::step(double dt, double inp)
 	V = Vp - dt*((gL*(Vp-EL) + gK*np*(Vp-EK) + gCa*mInf(Vp)*(Vp-ECa)))/CM;
 	n = np + dt*phi*(nInf(Vp)-np)/tauN(Vp);
 	s = sp + dt*(alpha*(1-sp)*fmax(Vp - VT, 0) - beta*sp);
-}
-
-
-void Neuron_ML::step(double dt)
-{
-	step(dt, 0.0);
 }

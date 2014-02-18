@@ -9,16 +9,16 @@
 
 
 
-void stepNetwork(nvector* nlist, double dt)
+void stepNetwork(nvector* nlist, double t, double dt)
 {
 	Neuron* nr;
 	for(size_t n=0; n<nlist->size(); n++)
 	{
 		nr = nlist->at(n);
-		nr->step(dt);
-	}
-		
+		nr->step(t, dt);
+	}		
 }
+
 
 void updateNetwork(nvector* nlist)
 {

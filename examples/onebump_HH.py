@@ -13,7 +13,8 @@ l = 10
 W0 = -1.0
 I = 0.1
 
-Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
+#Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
+Head  = array([Neuron_Osc(0.01, 0.001, 1) for _ in range(0,2)])			# The Head cells
 Strip = array([Neuron_HH() for _ in range(0,2*NStrip)])		# The Strip cells
 Right = Strip[0:NStrip]	
 Left  = Strip[NStrip:2*NStrip]
@@ -37,8 +38,10 @@ for i in range(NStrip/2, NStrip/2+1):
 	Left[i].Vp = -0.0
 #	Right[i].sp = 1.0
 #	Left[i].sp  = 1.0
-Head[0].sp = 1.0
-Head[1].sp = 0.0
+#Head[0].sp = 1.0
+#Head[1].sp = 0.0
+Head[0].strength = 1
+Head[1].strength = 0.0
 
 
 t= 0
@@ -52,7 +55,7 @@ plotVarName = "Vp"; yaxis = (-100, 70)
 # MAIN TIMELOOP
 while(t < 200):
 	t= t+dt
-	stepNetwork(Strip, dt)  # Perform time-step in Strip cells
+	stepNetwork(Strip, t, dt)  # Perform time-step in Strip cells
 	updateNetwork(Strip)	# Update Neuron.sp = Neuron.s
 	ll = get_neuron_entry(Left, plotVarName)
 	rr = get_neuron_entry(Right, plotVarName)
@@ -70,7 +73,7 @@ while(t < 200):
 	# if(m==80):
 	# 	Head[0].sp = 1.0
 	if(abs(t-50) < dt):
-		Head[0].sp = 0.0
-		Head[1].sp = 1.0
+		Head[0].strength = 0.0
+		Head[1].strength = 1.0
 	
 	m= m+1

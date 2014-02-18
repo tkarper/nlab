@@ -51,7 +51,7 @@ plotVarName = "Vp"; yaxis = (-100, 70)
 # MAIN TIMELOOP
 while(t < 200):
 	t= t+dt
-	stepNetwork(Strip, dt)  # Perform time-step in Strip cells
+	stepNetwork(Strip, t, dt)  # Perform time-step in Strip cells
 	updateNetwork(Strip)	# Update Neuron.sp = Neuron.s
 	ll = get_neuron_entry(Left, plotVarName)
 	rr = get_neuron_entry(Right, plotVarName)

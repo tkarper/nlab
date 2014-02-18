@@ -38,7 +38,7 @@ h(0.6), hp(0.6)
 }
 
 
-void Neuron_HH::step(double dt, double inp)
+void Neuron_HH::step(double t, double dt, double inp)
 {
 	// Compute input (synaptic potentials) coming from other neurons
 	double ip = 0.0;
@@ -55,10 +55,4 @@ void Neuron_HH::step(double dt, double inp)
 	h = hp + dt*phi*(alpha_h(Vp)*(1-hp) - beta_h(Vp)*hp);
 //	s = sp + dt*(alpha*(1-sp)*heaviside(Vp - VT) - beta*sp);
 	s = sp + dt*phi*(alpha*fmax(Vp-VT,0)/(VM-VT) - beta*sp);
-}
-
-
-void Neuron_HH::step(double dt)
-{
-	step(dt, 0.0);
 }

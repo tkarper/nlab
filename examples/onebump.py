@@ -42,7 +42,7 @@ plt.ion()
 while(t < 100):
 	t= t+dt
 	m= m+1
-	stepNetwork(Strip, dt)  # Perform time-step in Strip cells
+	stepNetwork(Strip, t, dt)  # Perform time-step in Strip cells
 	updateNetwork(Strip)	# Update Neuron.sp = Neuron.s
 	ll = get_spike_rates(Left)
 	rr = get_spike_rates(Right)

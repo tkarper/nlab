@@ -36,7 +36,7 @@ Neuron_IF::~Neuron_IF()
 
 
 
-void Neuron_IF::step(double dt, double inp)
+void Neuron_IF::step(double t, double dt, double inp)
 {
 	double ip=0.0;
 	Neuron * nr;
@@ -48,13 +48,6 @@ void Neuron_IF::step(double dt, double inp)
 	
 	s = (1.0 - dt)*sp + dt*fmax(ip + I + inp,0.0);
 }
-
-
-void Neuron_IF::step(double dt)
-{
-	step(dt,0.0);
-}
-
 
 
 

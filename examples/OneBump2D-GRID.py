@@ -78,8 +78,8 @@ SMAVI = MAVI.mlab_source
 while(t < 4000):
 	t= t+dt
 	m= m+1
-	stepNetwork(Strip, dt)      # Perform time-step in Strip cells
-	stepNetwork(Grid, dt)      	# Perform time-step in Strip cells
+	stepNetwork(Strip, t, dt)      # Perform time-step in Strip cells
+	stepNetwork(Grid, t, dt)      	# Perform time-step in Strip cells
 	updateNetwork(Strip)	    # Update Neuron.sp = Neuron.s
 	updateNetwork(Grid)	     	# Update Neuron.sp = Neuron.s
 	

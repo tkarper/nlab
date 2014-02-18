@@ -12,7 +12,7 @@ void connect_with_matrix(nvector* from, nvector* to, ConMat* M);		// Create conn
 void connect_with_matrix2(nvector* from, nvector* to, ConMat2* M);		// Create connections according to ConMat.
 
 // Update a list of Neurons
-void stepNetwork(nvector* nlist, double dt);   // Solve for s
+void stepNetwork(nvector* nlist, double t, double dt);   // Solve for s
 void updateNetwork(nvector* nlist);			   // sp = s
 
 
