@@ -151,6 +151,43 @@ ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w)
 	}
 	return M;
 }
+
+
+ConMat2* strip_matrix_local_OneBump(int num_neuro, int l, double w)
+{
+	if (l < 0 || l >= num_neuro)
+		throw std::invalid_argument("in strip_matrix_OneBump2(): parameter l must lie between 0 and num_neuro-1");
+	if (w < 0)
+		std::cout << "Warning: strip cell weight 'w' is negative." << std::endl;
+	double wIn = -w, wEx = w;
+		
+	ConMat2* M = new ConMat2(2*num_neuro, 2*num_neuro);
+	for(int n=0; n<num_neuro; n++)
+	{
+		const int nR = n, nL = n+num_neuro;
+		for(int m=1; m<=l; m++)
+		{
+			int iRLeft = (n-m+num_neuro) % num_neuro;
+			int iRRight = (n+m) % num_neuro;
+			int iLLeft = iRLeft + num_neuro;
+			int iLRight = iRRight + num_neuro;
+			// Add leftgoing connections
+			M->add(iRLeft, nR, wIn);
+//			M->add(iLLeft, nR, wIn);
+//			M->add(iRLeft, nL, wEx);
+			M->add(iLLeft, nL, wEx);
+			// Add rightgoing connections
+			M->add(iRRight, nR, wEx);
+//			M->add(iLRight, nR, wEx);
+//			M->add(iRRight, nL, wIn);
+			M->add(iLRight, nL, wIn);
+		}
+		// Add exitatory connection between opposing neurons
+		M->add(nL, nR, wEx);
+		M->add(nR, nL, wEx);
+	}
+	return M;
+}
  
 
 // Up, Down, Right, Left

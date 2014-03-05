@@ -42,6 +42,9 @@ where Strip = [Left, Right]
 #endif
 ConMat* strip_matrix_OneBump(int num_neuro, int l, double w);
 ConMat2* strip_matrix_OneBump2(int num_neuro, int l, double w);
+// Uses only local (exitatory and inhibitory) connections.
+// w is assumed to be a positive number
+ConMat2* strip_matrix_local_OneBump(int num_neuro, int l, double w);
 
 
 #ifdef SWIG
