@@ -22,7 +22,7 @@ l  = 4# 3
 W0 = -0.5 #0.5
 I = 1.0
 speed = 2.5
-accel = 2.0
+accel = 1.0
 velocity = array([speed, 0])
 velMpy = 0.025
 
@@ -89,7 +89,7 @@ plt.ion()
 
 
 # MAIN TIMELOOP
-while(t < 400000):
+while(1):
 	t= t+dt
 	m= m+1
 	stepNetwork(Strip, t, dt)      # Perform time-step in Strip cells
@@ -104,7 +104,9 @@ while(t < 400000):
 		sp = get_spike_rates(Grid)
 		sp = sp.reshape([NStrip,NStrip])
 		# Check if recording neuron is firing
-		if(sp[firingIndex] > amax(sp)*0.9):
+		if(sp[firingIndex] > amax(sp)*0.6):
+#			maxInd = unravel_index(sp.argmax(), sp.shape)
+#			print linalg.norm(array(firingIndex)-array(maxInd)) * (posXLim[1]-posXLim[0])/NStrip
 			firingPos[0] = append(firingPos[0], position[0])
 			firingPos[1] = append(firingPos[1], position[1])
 	
@@ -113,7 +115,7 @@ while(t < 400000):
 		posHist[0] = append(posHist[0], position[0])
 		posHist[1] = append(posHist[1], position[1])
 	
-	if(m%300 == 0):
+	if(m%20 == 0):
 		plt.clf()
 
 		# Plot strip cells
@@ -137,23 +139,24 @@ while(t < 400000):
 		plt.subplot(2,2,3)
 		plt.pcolor(xGrid, yGrid, sp)
 		plt.title('Grid cells')
-#		SMAVI.reset(scalars=sp)
-#		mlab.savefig('./fig/%d.png'%d)
 
 		# Plot representation of space
 		plt.subplot(2,2,2)
 		# Plot position history
-		plt.plot(posHist[0], posHist[1], '0.8')
+		plt.plot(posHist[0], posHist[1], '0.7')
 		# Plot earlier firing positions
 		if (firingPos[0].size > 0):
 			plt.plot(firingPos[0], firingPos[1], 'ro')
 		# Plot current position
 		plt.plot(position[0], position[1], 'o')
+		plt.title('Physical space')
+		plt.axis('scaled')
 		plt.xlim(posXLim)
 		plt.ylim(posYLim)
 		
 		# Draw figure and advance counter
 		plt.draw()
+		plt.savefig('./fig/%d.png'%d)
 		d= d+1
 		
 	# Update velocity in circular motion
@@ -166,23 +169,33 @@ while(t < 400000):
 
 	# Update velocity randomly
 	# Compute change in velocity randomly
-	dv = array((velocity[1], -velocity[0]))*(2*random.random() - 1)
-	dv = dv/linalg.norm(dv)*accel*dt
-	# Update velocity and normalize
-	velocity = velocity + dv
-	# velocity[0] = 1
-	# velocity[1] = 1
-	velocity = velocity * speed/linalg.norm(velocity)
+	dvNorm = 0.0
+	while dvNorm < finfo(float).eps:
+		dv = array((velocity[1], -velocity[0]))*(2*random.random() - 1)
+		dvNorm = linalg.norm(dv)
+	dv = dv/dvNorm*accel*dt
 	
+	# Update velocity and normalize
+	newVel = velocity + dv
+	newVel *= speed/max(1.0, linalg.norm(newVel))
 	# Update position
-	position -= velocity*dt*velMpy
+	newPos = position - newVel*dt*velMpy
 	# Make sure we stay in the box
-	if position[0] < posXLim[0] or position[0] > posXLim[1]:
-		velocity[0] *= -1
-		position[0] -= 2*velocity[0]*dt*velMpy
-	if position[1] < posYLim[0] or position[1] > posYLim[1]:
-		velocity[1] *= -1
-		position[1] -= 2*velocity[1]*dt*velMpy
+	if newPos[0] < posXLim[0]:
+		newPos[0] = posXLim[0]
+		newVel[0] = (posXLim[0] - position[0]) / (-velMpy*dt)
+	if newPos[0] > posXLim[1]:
+		newPos[0] = posXLim[1]
+		newVel[0] = (posXLim[1] - position[0]) / (-velMpy*dt)
+	if newPos[1] < posYLim[0]:
+		newPos[1] = posYLim[0]
+		newVel[1] = (posYLim[0] - position[1]) / (-velMpy*dt)
+	if newPos[1] > posXLim[1]:
+		newPos[1] = posYLim[1]
+		newVel[1] = (posYLim[1] - position[1]) / (-velMpy*dt)
+	
+	position = newPos
+	velocity = newVel
 	
 	# Update HD cells (right, left, up, down)
 	Head[0].sp = fmax(velocity[0], 0.0)
@@ -193,6 +206,6 @@ while(t < 400000):
 #	# Update HD cells (right, left, right-up, left-down)
 #	Head[0].sp = fmax(velocity[0], 0.0)
 #	Head[1].sp = fmax(-velocity[0], 0.0)
-#	diagVel = -sqrt(3.0)*velocity[0] + 2*velocity[1]
+#	diagVel = -velocity[0]/sqrt(3.0) + 2*velocity[1]/sqrt(3.0)
 #	Head[2].sp = fmax(diagVel, 0.0)
 #	Head[3].sp = fmax(-diagVel, 0.0)
