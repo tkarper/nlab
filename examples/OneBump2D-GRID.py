@@ -8,11 +8,19 @@ from mayavi import mlab
 
 NStrip = 2**5
 dt = 0.1
+xGrid, yGrid = mgrid[0:1:1.0/NStrip, 0:1:1.0/NStrip]
+xStrip = linspace(0, 1, NStrip)
+position = array([0.0,0.0])
+posXLim = array([-10.0, 10.0])
+posYLim = array([-10.0, 10.0])
 
 alpha = 0.1
 l  = 3
 W0 = -0.5
 I = 1.0
+speed = 1.0
+accel = 1.0
+velocity = array([speed, 0])
 
 # Create Head cells
 Head   = array([Neuron_IF() for _ in range(0,4)])			# The Head cells
@@ -68,9 +76,11 @@ d = 0
 
 sp = get_spike_rates(Grid)
 sp = sp.reshape([NStrip,NStrip])
-fig = mlab.figure(size=(800,800))
-MAVI = mlab.surf(sp)
-SMAVI = MAVI.mlab_source
+#fig = mlab.figure(size=(800,800))
+#MAVI = mlab.surf(sp)
+#SMAVI = MAVI.mlab_source
+plt.figure()
+plt.ion()
 
 
 
@@ -84,23 +94,60 @@ while(t < 4000):
 	updateNetwork(Grid)	     	# Update Neuron.sp = Neuron.s
 	
 	
-	if(m%60 == 0):
+	if(m%10 == 0):
+		plt.clf()
+
+		# Plot strip cells
+		ll = (get_spike_rates(Left), get_spike_rates(Down))
+		rr = (get_spike_rates(Right), get_spike_rates(Up))
+		plotIndex = (1, 4)
+		for i in (0,1):
+			plt.subplot(2,2,plotIndex[i])
+			plt.plot(xStrip, ll[i], '-o')
+			plt.plot(xStrip, rr[i], '-s')
+			plt.ylim((0,1))
+			plt.title('Strip cell module %i'%(i+1))
+			
+		# Plot grid cells
 		sp = get_spike_rates(Grid)
 		sp = sp.reshape([NStrip,NStrip])
-		SMAVI.reset(scalars=sp)
-		mlab.savefig('./fig/%d.png'%d)
+		plt.subplot(2,2,3)
+		plt.pcolor(xGrid, yGrid, sp)
+		plt.title('Grid cells')
+#		SMAVI.reset(scalars=sp)
+#		mlab.savefig('./fig/%d.png'%d)
+
+		# Plot representation of space
+		plt.subplot(2,2,2)
+		plt.plot(position[0], position[1], 'o')
+		plt.xlim(posXLim)
+		plt.ylim(posYLim)
+
+		plt.draw()
+		
 		d= d+1
 		
-	xvel = cos(t/20.0)
-	yvel = sin(t/20.0)
-	Head[0].sp = fmax(xvel, 0.0)
-	Head[1].sp = fmax(-xvel, 0.0)
-	Head[2].sp = fmax(yvel, 0.0)
-	Head[3].sp = fmax(-yvel, 0.0)
-	#if(m==80):
-	#	Head[0].sp = 1.0
-	#if(m==1000):
-	#	Head[1].sp = 1.0
-	#	Head[0].sp = 0.0
-		
-	
+	# Update velocity in circular motion
+#	xvel = cos(t/20.0)
+#	yvel = sin(t/20.0)
+#	Head[0].sp = fmax(xvel, 0.0)
+#	Head[1].sp = fmax(-xvel, 0.0)
+#	Head[2].sp = fmax(yvel, 0.0)
+#	Head[3].sp = fmax(-yvel, 0.0)
+
+	# Update velocity randomly
+	# Compute change in velocity randomly
+	dv = array((velocity[1], -velocity[0]))*(2*random.random() - 1)
+	dv = dv/linalg.norm(dv)*accel*dt
+	# Update velocity and normalize
+	velocity = velocity + dv
+	velocity = velocity / linalg.norm(velocity)
+	# Update position
+	position += velocity*dt*0.1
+	print position
+	# print("New velocity: (%f, %f)" % (velocity[0], velocity[1]))
+	# Update HD cells
+	Head[0].sp = fmax(velocity[0], 0.0)
+	Head[1].sp = fmax(-velocity[0], 0.0)
+	Head[2].sp = fmax(velocity[1], 0.0)
+	Head[3].sp = fmax(-velocity[1], 0.0)
