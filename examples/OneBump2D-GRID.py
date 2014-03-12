@@ -100,13 +100,17 @@ while(t < 4000):
 		# Plot strip cells
 		ll = (get_spike_rates(Left), get_spike_rates(Down))
 		rr = (get_spike_rates(Right), get_spike_rates(Up))
-		plotIndex = (1, 4)
-		for i in (0,1):
-			plt.subplot(2,2,plotIndex[i])
-			plt.plot(xStrip, ll[i], '-o')
-			plt.plot(xStrip, rr[i], '-s')
-			plt.ylim((0,1))
-			plt.title('Strip cell module %i'%(i+1))
+		
+		plt.subplot(2,2,1)
+		plt.plot(xStrip, ll[0], '-o')
+		plt.plot(xStrip, rr[0], '-s')
+		plt.ylim((0,1))
+		plt.title('Strip cell module 1')
+		plt.subplot(2,2,4)
+		plt.plot(ll[1], xStrip, '-o')
+		plt.plot(rr[1], xStrip, '-s')
+		plt.xlim((0,1))
+		plt.title('Strip cell module 2')
 			
 		# Plot grid cells
 		sp = get_spike_rates(Grid)
@@ -143,8 +147,8 @@ while(t < 4000):
 	velocity = velocity + dv
 	velocity = velocity / linalg.norm(velocity)
 	# Update position
-	position += velocity*dt*0.1
-	print position
+	position -= velocity*dt*0.1
+	# print position
 	# print("New velocity: (%f, %f)" % (velocity[0], velocity[1]))
 	# Update HD cells
 	Head[0].sp = fmax(velocity[0], 0.0)
