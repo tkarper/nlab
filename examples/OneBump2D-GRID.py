@@ -11,16 +11,20 @@ dt = 0.1
 xGrid, yGrid = mgrid[0:1:1.0/NStrip, 0:1:1.0/NStrip]
 xStrip = linspace(0, 1, NStrip)
 position = array([0.0,0.0])
-posXLim = array([-10.0, 10.0])
-posYLim = array([-10.0, 10.0])
+posXLim = array([-4.0, 4.0])
+posYLim = array([-4.0, 4.0])
+firingPos = [array([]), array([])]
+firingIndex = (NStrip/2, NStrip/2)	# Which neuron to record
+posHist = [array([]), array([])]
 
 alpha = 0.1
-l  = 3
+l  = 4# 3
 W0 = -0.5
 I = 1.0
-speed = 1.0
-accel = 1.0
+speed = 5.0
+accel = 5.0
 velocity = array([speed, 0])
+velMpy = 0.05
 
 # Create Head cells
 Head   = array([Neuron_IF() for _ in range(0,4)])			# The Head cells
@@ -94,7 +98,22 @@ while(t < 4000):
 	updateNetwork(Grid)	     	# Update Neuron.sp = Neuron.s
 	
 	
-	if(m%10 == 0):
+	# Record firing position
+	if(m%1 == 0):
+		# Get spike rates
+		sp = get_spike_rates(Grid)
+		sp = sp.reshape([NStrip,NStrip])
+		# Check if recording neuron is firing
+		if(sp[firingIndex] > amax(sp)*0.9):
+			firingPos[0] = append(firingPos[0], position[0])
+			firingPos[1] = append(firingPos[1], position[1])
+	
+	# Record position history
+	if(m%20 == 0):
+		posHist[0] = append(posHist[0], position[0])
+		posHist[1] = append(posHist[1], position[1])
+	
+	if(m%50 == 0):
 		plt.clf()
 
 		# Plot strip cells
@@ -123,12 +142,18 @@ while(t < 4000):
 
 		# Plot representation of space
 		plt.subplot(2,2,2)
+		# Plot position history
+		plt.plot(posHist[0], posHist[1], '0.8')
+		# Plot earlier firing positions
+		if (firingPos[0].size > 0):
+			plt.plot(firingPos[0], firingPos[1], 'ro')
+		# Plot current position
 		plt.plot(position[0], position[1], 'o')
 		plt.xlim(posXLim)
 		plt.ylim(posYLim)
-
-		plt.draw()
 		
+		# Draw figure and advance counter
+		plt.draw()
 		d= d+1
 		
 	# Update velocity in circular motion
@@ -145,13 +170,27 @@ while(t < 4000):
 	dv = dv/linalg.norm(dv)*accel*dt
 	# Update velocity and normalize
 	velocity = velocity + dv
-	velocity = velocity / linalg.norm(velocity)
+	velocity = velocity * speed/linalg.norm(velocity)
+	
 	# Update position
-	position -= velocity*dt*0.1
-	# print position
-	# print("New velocity: (%f, %f)" % (velocity[0], velocity[1]))
-	# Update HD cells
+	position -= velocity*dt*velMpy
+	# Make sure we stay in the box
+	if position[0] < posXLim[0] or position[0] > posXLim[1]:
+		velocity[0] *= -1
+		position[0] -= 2*velocity[0]*dt*velMpy
+	if position[1] < posYLim[0] or position[1] > posYLim[1]:
+		velocity[1] *= -1
+		position[1] -= 2*velocity[1]*dt*velMpy
+	
+	# Update HD cells (right, left, up, down)
 	Head[0].sp = fmax(velocity[0], 0.0)
 	Head[1].sp = fmax(-velocity[0], 0.0)
 	Head[2].sp = fmax(velocity[1], 0.0)
 	Head[3].sp = fmax(-velocity[1], 0.0)
+	
+#	# Update HD cells (right, left, right-up, left-down)
+#	Head[0].sp = fmax(velocity[0], 0.0)
+#	Head[1].sp = fmax(-velocity[0], 0.0)
+#	diagVel = -sqrt(3.0)*velocity[0] + 2*velocity[1]
+#	Head[2].sp = fmax(diagVel, 0.0)
+#	Head[3].sp = fmax(-diagVel, 0.0)
