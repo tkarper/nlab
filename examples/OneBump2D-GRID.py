@@ -7,24 +7,24 @@ import matplotlib.pyplot as plt
 from mayavi import mlab
 
 NStrip = 2**5
-dt = 0.1
+dt = 0.2
 xGrid, yGrid = mgrid[0:1:1.0/NStrip, 0:1:1.0/NStrip]
 xStrip = linspace(0, 1, NStrip)
 position = array([0.0,0.0])
-posXLim = array([-4.0, 4.0])
-posYLim = array([-4.0, 4.0])
+posXLim = array([-6.0, 6.0])
+posYLim = array([-6.0, 6.0])
 firingPos = [array([]), array([])]
 firingIndex = (NStrip/2, NStrip/2)	# Which neuron to record
 posHist = [array([]), array([])]
 
-alpha = 0.1
+alpha = 0.03
 l  = 4# 3
-W0 = -0.5
+W0 = -0.5 #0.5
 I = 1.0
-speed = 5.0
-accel = 5.0
+speed = 2.5
+accel = 2.0
 velocity = array([speed, 0])
-velMpy = 0.05
+velMpy = 0.025
 
 # Create Head cells
 Head   = array([Neuron_IF() for _ in range(0,4)])			# The Head cells
@@ -89,7 +89,7 @@ plt.ion()
 
 
 # MAIN TIMELOOP
-while(t < 4000):
+while(t < 400000):
 	t= t+dt
 	m= m+1
 	stepNetwork(Strip, t, dt)      # Perform time-step in Strip cells
@@ -113,7 +113,7 @@ while(t < 4000):
 		posHist[0] = append(posHist[0], position[0])
 		posHist[1] = append(posHist[1], position[1])
 	
-	if(m%50 == 0):
+	if(m%300 == 0):
 		plt.clf()
 
 		# Plot strip cells
@@ -170,6 +170,8 @@ while(t < 4000):
 	dv = dv/linalg.norm(dv)*accel*dt
 	# Update velocity and normalize
 	velocity = velocity + dv
+	# velocity[0] = 1
+	# velocity[1] = 1
 	velocity = velocity * speed/linalg.norm(velocity)
 	
 	# Update position
