@@ -115,7 +115,7 @@ while(1):
 		posHist[0] = append(posHist[0], position[0])
 		posHist[1] = append(posHist[1], position[1])
 	
-	if(m%20 == 0):
+	if(m%400 == 0):
 		plt.clf()
 
 		# Plot strip cells
@@ -156,7 +156,7 @@ while(1):
 		
 		# Draw figure and advance counter
 		plt.draw()
-		plt.savefig('./fig/%d.png'%d)
+#		plt.savefig('./fig/%d.png'%d)
 		d= d+1
 		
 	# Update velocity in circular motion
@@ -203,9 +203,11 @@ while(1):
 #	Head[2].sp = fmax(velocity[1], 0.0)
 #	Head[3].sp = fmax(-velocity[1], 0.0)
 	
+	
 	# Update HD cells (right, left, right-up, left-down)
-	Head[0].sp = fmax(velocity[0], 0.0)
-	Head[1].sp = fmax(-velocity[0], 0.0)
-	diagVel = -velocity[0]/sqrt(3.0) + 2*velocity[1]/sqrt(3.0)
+	horVel = velocity[0] - velocity[1]/sqrt(3.0)
+	diagVel = 2*velocity[1]/sqrt(3.0)
+	Head[0].sp = fmax(horVel, 0.0)
+	Head[1].sp = fmax(-horVel, 0.0)
 	Head[2].sp = fmax(diagVel, 0.0)
 	Head[3].sp = fmax(-diagVel, 0.0)
