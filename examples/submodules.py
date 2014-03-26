@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 
-from numpy import *
+import numpy as np
 from nlab import *
 import random
 import matplotlib.pyplot as plt
@@ -26,20 +26,23 @@ print('Initializing...')
 
 
 # Create stellate cells
-Stellates = array([Neuron_TIF() for _ in range(0,NStell)])
+Stellates = np.array([Neuron_TIF() for _ in range(0,NStell)])
 for i in range(0,NStell):
 	Stellates[i].I = I
 	Stellates[i].sp = random.random()*0.1		# Initialize randomly
 	
 # Create interneurons and link to stellate cells
-NIntNeuro = 1
-IntNeuro = array([Neuron_TIF() for _ in range(0,NIntNeuro)])
-connect_many_to_many(Stellates, IntNeuro, s2in)
-connect_many_to_many(IntNeuro, Stellates, in2s)
+NIntNeuro = 5	# Number of interneurons
+NSPerIN = 100	# Number of stellates per submodule
+IntNeuro = np.array([Neuron_TIF() for _ in range(0,NIntNeuro)])
+for i in range(0,NIntNeuro):
+	submod = np.random.choice(Stellates, NSPerIN, False)
+	connect_many_to_many(submod, IntNeuro[i], s2in)
+	connect_many_to_many(IntNeuro[i], submod, in2s)
 
 # Create head cells
 NHead = 16		# Number of head cells
-Heads = array([Neuron_IF() for _ in range(0,16)])
+Heads = np.array([Neuron_IF() for _ in range(0,16)])
 
 # Link HD cells to stellates
 Nh2sConns = 3	# Number of head to stellate connections per stellate cell
