@@ -18,7 +18,7 @@ velocity = array([speed])
 
 
 Head  = array([Neuron_IF() for _ in range(0,2)])			# The Head cells
-Strip = array([Neuron_TIF() for _ in range(0,2*NStrip)])		# The Strip cells
+Strip = array([Neuron_IF() for _ in range(0,2*NStrip)])		# The Strip cells
 Right = Strip[0:NStrip]	
 Left  = Strip[NStrip:2*NStrip]
 

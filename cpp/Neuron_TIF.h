@@ -11,8 +11,9 @@ class Neuron_TIF: public Neuron
 {
 public:
 	double d, dp;	// Tiredness variable
-	double C1, C2;	// Dampening and input constants
+	static double C1, C2;	// Dampening and input constants
 
+	Neuron_TIF() : d(0), dp(0) {}
 	void step(double t, double dt, double input);
 	void update() { Neuron::update(); dp = d; }
 };

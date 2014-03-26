@@ -72,6 +72,9 @@ PyObject* get_neuron_entry(nvector* nr, const char* vn)
 	if (varname == "sp")
 		for(size_t i=0; i<nr->size(); i++)
 			rr[i] = (nr->at(i))->sp;
+	else if (varname == "dp")
+		for(size_t i=0; i<nr->size(); i++)
+			rr[i] = dynamic_cast<Neuron_TIF*>(nr->at(i))->dp;
 	else if (varname == "Vp")
 		for(size_t i=0; i<nr->size(); i++)
 			rr[i] = dynamic_cast<Neuron_HH*>(nr->at(i))->Vp;

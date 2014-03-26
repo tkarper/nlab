@@ -41,7 +41,30 @@ void connect_one_to_many(Neuron* from, nvector* to, double w)
 		Neuron* nr = to->at(j);
 		nr->connect(from, w);	
 	}
-		
+}
+
+
+void connect_many_to_one(nvector* from, Neuron* to, double w)
+{
+	for(size_t j=0; j < from->size(); j++)
+	{
+		Neuron* nr = from->at(j);
+		to->connect(nr, w);
+	}
+}
+
+
+void connect_many_to_many(nvector* from, nvector* to, double w)
+{
+	for(size_t j=0; j < from->size(); j++)
+	{
+		Neuron* nFrom = from->at(j);
+		for(size_t k=0; k < to->size(); k++)
+		{
+			Neuron* nTo = to->at(k);
+			nTo->connect(nFrom, w);	
+		}
+	}	
 }
 
 

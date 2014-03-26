@@ -8,6 +8,8 @@
 
 // Create connections
 void connect_one_to_many(Neuron* from, nvector* to, double w);			// Create all-to-all connections with weight w.
+void connect_many_to_one(nvector* from, Neuron* to, double w);
+void connect_many_to_many(nvector* from, nvector* to, double w);
 void connect_with_matrix(nvector* from, nvector* to, ConMat* M);		// Create connections according to ConMat.
 void connect_with_matrix2(nvector* from, nvector* to, ConMat2* M);		// Create connections according to ConMat.
 
