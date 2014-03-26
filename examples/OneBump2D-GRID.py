@@ -197,17 +197,17 @@ while(1):
 	position = newPos
 	velocity = newVel
 	
-#	# Update HD cells (right, left, up, down)
-#	Head[0].sp = fmax(velocity[0], 0.0)
-#	Head[1].sp = fmax(-velocity[0], 0.0)
-#	Head[2].sp = fmax(velocity[1], 0.0)
-#	Head[3].sp = fmax(-velocity[1], 0.0)
+	# Update HD cells (right, left, up, down)
+	Head[0].sp = fmax(velocity[0], 0.0)
+	Head[1].sp = fmax(-velocity[0], 0.0)
+	Head[2].sp = fmax(velocity[1], 0.0)
+	Head[3].sp = fmax(-velocity[1], 0.0)
 	
 	
-	# Update HD cells (right, left, right-up, left-down)
-	horVel = velocity[0] - velocity[1]/sqrt(3.0)
-	diagVel = 2*velocity[1]/sqrt(3.0)
-	Head[0].sp = fmax(horVel, 0.0)
-	Head[1].sp = fmax(-horVel, 0.0)
-	Head[2].sp = fmax(diagVel, 0.0)
-	Head[3].sp = fmax(-diagVel, 0.0)
+#	# Update HD cells (right, left, right-up, left-down)
+#	horVel = velocity[0] - velocity[1]/sqrt(3.0)
+#	diagVel = 2*velocity[1]/sqrt(3.0)
+#	Head[0].sp = fmax(horVel, 0.0)
+#	Head[1].sp = fmax(-horVel, 0.0)
+#	Head[2].sp = fmax(diagVel, 0.0)
+#	Head[3].sp = fmax(-diagVel, 0.0)
