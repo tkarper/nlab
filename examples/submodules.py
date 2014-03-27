@@ -36,8 +36,11 @@ NIntNeuro = 5	# Number of interneurons
 NSPerIN = 100	# Number of stellates per submodule
 IntNeuro = np.array([Neuron_TIF() for _ in range(0,NIntNeuro)])
 for i in range(0,NIntNeuro):
-	submod = np.random.choice(Stellates, NSPerIN, False)
+	submodInd = random.sample(xrange(NStell), NSPerIN)
+	submod = Stellates[submodInd]
+	print('connecting s2in')
 	connect_many_to_many(submod, IntNeuro[i], s2in)
+	print('connecting in2s')
 	connect_many_to_many(IntNeuro[i], submod, in2s)
 
 # Create head cells

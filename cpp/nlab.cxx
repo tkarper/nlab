@@ -56,11 +56,13 @@ void connect_many_to_one(nvector* from, Neuron* to, double w)
 
 void connect_many_to_many(nvector* from, nvector* to, double w)
 {
+	std::cout << from->size() << ", " << to->size() << std::endl;
 	for(size_t j=0; j < from->size(); j++)
 	{
 		Neuron* nFrom = from->at(j);
 		for(size_t k=0; k < to->size(); k++)
 		{
+			std::cout << from->size() << ", " << to->size() << std::endl;
 			Neuron* nTo = to->at(k);
 			nTo->connect(nFrom, w);	
 		}
