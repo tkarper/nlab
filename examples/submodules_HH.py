@@ -12,52 +12,68 @@ nStell = 50		# Number of stellate cells
 dt = 0.01
 
 # Connection strengths
-I = 1.0			# External exitatory input
+I = 0.5			# External exitatory input
 s2in = 1.0		# Stellate to interneuron
 in2s = -1.0		# Interneuron to stellate
-hd2s = 1.0		# HD cell to stellate
-
-# TIF constants: depression decay rate and input rate
-cvar.Neuron_TIF_C1 = 0.05
-cvar.Neuron_TIF_C2 = 0.1
+hd2s = 2.0		# HD cell to stellate
 
 
 
 print('Initializing...')
 
 
+
 # Create stellate cells
 Stellates = np.array([Neuron_HH() for _ in range(0,nStell)])
-for i in range(0,nStell):
-	Stellates[i].I = I
 cvar.Neuron_HH_alpha = 2
 cvar.Neuron_HH_beta = 2
-	
-# Create interneurons
-nIntNeuro = 10	# Number of interneurons
-IntNeuros = np.array([Neuron_IF() for _ in range(0,nIntNeuro)])
 
-# Link interneurons to stellate cells and to one another
+# Create theta oscillator and link to stellates
+Theta = np.array([Neuron_Osc(10, 1, 1)])	# Period, duration, strength
+connect_one_to_many(Theta[0], Stellates, I)
+#for i in range(0,nStell):
+#	Stellates[i].I = I
+		
+# Create interneurons and link to one another
+nIntNeuro = 5	# Number of interneurons
+IntNeuros = np.array([Neuron_HH() for _ in range(0,nIntNeuro)])
 connect_many_to_many(IntNeuros, IntNeuros, in2s)
+
+# Link interneurons to stellate cells
 nSPerIN = 30	# Number of stellates per submodule
+## Uniformly random sample
+#for i in range(0,nIntNeuro):
+#	submodInd = random.sample(xrange(nStell), nSPerIN)
+#	submod = Stellates[submodInd]
+#	connect_many_to_one(submod, IntNeuros[i], s2in)
+#	connect_one_to_many(IntNeuros[i], submod, in2s)
+## Lateral normal distribution
+distr = np.random.normal(0.0, 0.2, (nStell, nIntNeuro))
+distr = distr
 for i in range(0,nIntNeuro):
-	submodInd = random.sample(xrange(nStell), nSPerIN)
+	# Convert normally distributed numbers to indices in [0, nStell)
+	submodInd = np.round(i*nStell/float(nIntNeuro) + nStell*distr[...,i]).astype(int)
+	# Compute indices modulo nStell, avoiding negative index values
+	submodInd = np.mod(nStell + np.mod(submodInd, nStell), nStell)
+	print(submodInd)
+	# Extract the submodule and create connections to and from interneuron i
 	submod = Stellates[submodInd]
 	connect_many_to_one(submod, IntNeuros[i], s2in)
 	connect_one_to_many(IntNeuros[i], submod, in2s)
 
 # Create head cells
-nHead = 3		# Number of head cells
-Heads = np.array([Neuron_IF() for _ in range(0,nHead)])
+nHead = 2		# Number of head cells
+Heads = np.array([Neuron() for _ in range(0,nHead)])
+#Heads = np.array([Neuron_Osc(5, 1, 1), Neuron_Osc(5, 0, 0)])
 
 # Link HD cells to stellates
-Nh2sConns = 3	# Number of head to stellate connections per stellate cell
+Nh2sConns = 1	# Number of head to stellate connections per stellate cell
 for i in range(0,nStell):
-#	headInd = random.sample(xrange(nHead), Nh2sConns)
-#	connect_many_to_one(Heads[headInd], Stellates[i], hd2s)
-	for j in range(0,Nh2sConns):
-		headInd = random.randrange(nHead)
-		Stellates[i].connect(Heads[headInd], hd2s)
+	headInd = random.sample(xrange(nHead), Nh2sConns)
+	connect_many_to_one(Heads[headInd], Stellates[i], hd2s)
+#	for j in range(0,Nh2sConns):
+#		headInd = random.randrange(nHead)
+#		Stellates[i].connect(Heads[headInd], hd2s)
 
 
 print('Initialization finished.')
@@ -69,11 +85,9 @@ plotInd = 0
 plt.figure()
 plt.ion()
 
-direction = 0.0
-dirInd = 0.0
 
 # MAIN TIMELOOP
-while(t < 100):
+while(True):
 	t = t+dt
 	m = m+1
 	
@@ -83,19 +97,23 @@ while(t < 100):
 	for i in range(0, nHead):
 		b = direction/(2*pi)
 		c = 0.1
-		Heads[i].sp = max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
-#		Heads[dirInd].sp = 0.0		# Turn off previous HD cell
-#		dirInd = round(math.fmod(direction/(2*math.pi), 1.0)*nHead - 0.5)
-#		Heads[dirInd].sp = 1.0		# Turn on HD cell
+		Heads[i].s = max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
 	
 	# Update neural network
+	stepNetwork(Theta, t, dt)
 	stepNetwork(Stellates, t, dt)
 	stepNetwork(IntNeuros, t, dt)
+	stepNetwork(Heads, t, dt)
 	updateNetwork(Stellates)
 	updateNetwork(IntNeuros)
+	updateNetwork(Theta)
+	updateNetwork(Heads)
 	
 	# Plot data
-	if(m%20 == 0):
+	plotInterval = 1.0
+	if(fmod(t, plotInterval) < dt):
+		print('t=%f'%t)
+		
 		plt.clf()
 #		sp = get_neuron_entry(Stellates, 'sp')
 		sp = get_neuron_entry(Stellates, 'Vp')
@@ -104,25 +122,29 @@ while(t < 100):
 #		plt.plot(x, dp, 'o')
 #		plt.ylim((0,1))
 		plt.ylim((-100,100))
-		plt.title('t=%f'%t)
+		plt.title('Stellate memb. pot.')
 		
 		plt.subplot(2,2,2)
 		sp = get_neuron_entry(Stellates, 'sp')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
-		plt.title('Stellate s')
+		plt.title('Stellate syn. pot.')
 		
 		plt.subplot(2,2,3)
+		sp = get_neuron_entry(IntNeuros, 'Vp')
+		plt.plot(sp, 'gs')
+		plt.ylim((-100,100))
+		plt.title('Interneuron memb. pot.')
+		
+		plt.subplot(2,2,4)
 		sp = get_neuron_entry(Heads, 'sp')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Head cells')
-		
-		plt.subplot(2,2,4)
-		sp = get_neuron_entry(IntNeuros, 'sp')
-		plt.plot(sp, 'bo')
-		plt.ylim((0,1))
-		plt.title('Interneurons')
+#		sp = get_neuron_entry(IntNeuros, 'sp')
+#		plt.plot(sp, 'bo')
+#		plt.ylim((0,1))
+#		plt.title('Interneuron syn. pot.')
 		
 		plt.draw()
 		#plt.savefig('./fig/%d.png'%plotInd)
