@@ -28,6 +28,7 @@ Stellates = np.array([Neuron_HH() for _ in range(0,nStell)])
 cvar.Neuron_HH_alpha = 2
 cvar.Neuron_HH_beta = 2
 
+
 # Create theta oscillator and link to stellates
 Theta = np.array([Neuron_Osc(10, 1, 1)])	# Period, duration, strength
 connect_one_to_many(Theta[0], Stellates, I)
@@ -63,8 +64,8 @@ for i in range(0,nIntNeuro):
 
 # Create head cells
 nHead = 2		# Number of head cells
-Heads = np.array([Neuron() for _ in range(0,nHead)])
-#Heads = np.array([Neuron_Osc(5, 1, 1), Neuron_Osc(5, 0, 0)])
+#Heads = np.array([Neuron() for _ in range(0,nHead)])
+Heads = np.array([Neuron_Osc(10, 1, 4), Neuron_Osc(5, 0, 0)])
 
 # Link HD cells to stellates
 Nh2sConns = 1	# Number of head to stellate connections per stellate cell
@@ -91,13 +92,13 @@ while(True):
 	t = t+dt
 	m = m+1
 	
-	# Update HD cells
-	direction = 0.0
-#	direction = fmod(2*pi + pi/8.0*sin(t/10.0), 2*pi)		# Direction in radians, from x-axis
-	for i in range(0, nHead):
-		b = direction/(2*pi)
-		c = 0.1
-		Heads[i].s = max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
+#	# Update HD cells
+#	direction = 0.0
+##	direction = fmod(2*pi + pi/8.0*sin(t/10.0), 2*pi)		# Direction in radians, from x-axis
+#	for i in range(0, nHead):
+#		b = direction/(2*pi)
+#		c = 0.1
+#		Heads[i].s = max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
 	
 	# Update neural network
 	stepNetwork(Theta, t, dt)
@@ -113,38 +114,50 @@ while(True):
 	plotInterval = 1.0
 	if(fmod(t, plotInterval) < dt):
 		print('t=%f'%t)
+#		print('Theta:sp = %f'%Theta[0].sp)
 		
 		plt.clf()
 #		sp = get_neuron_entry(Stellates, 'sp')
 		sp = get_neuron_entry(Stellates, 'Vp')
-		plt.subplot(2,2,1)
+		plt.subplot(2,3,1)
 		plt.plot(sp, 'gs')
 #		plt.plot(x, dp, 'o')
 #		plt.ylim((0,1))
 		plt.ylim((-100,100))
 		plt.title('Stellate memb. pot.')
 		
-		plt.subplot(2,2,2)
+		plt.subplot(2,3,2)
 		sp = get_neuron_entry(Stellates, 'sp')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Stellate syn. pot.')
 		
-		plt.subplot(2,2,3)
+		plt.subplot(2,3,3)
 		sp = get_neuron_entry(IntNeuros, 'Vp')
 		plt.plot(sp, 'gs')
 		plt.ylim((-100,100))
 		plt.title('Interneuron memb. pot.')
 		
-		plt.subplot(2,2,4)
+		plt.subplot(2,3,4)
 		sp = get_neuron_entry(Heads, 'sp')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Head cells')
-#		sp = get_neuron_entry(IntNeuros, 'sp')
+		
+		plt.subplot(2,3,5)
+		sp = get_neuron_entry(IntNeuros, 'sp')
+		plt.plot(sp, 'bo')
+		plt.ylim((0,1))
+		plt.title('Interneuron syn. pot.')
+
+#		plt.subplot(2,3,5)
+#		sp = get_neuron_entry(Stellates, 'np')
 #		plt.plot(sp, 'bo')
 #		plt.ylim((0,1))
-#		plt.title('Interneuron syn. pot.')
+#		plt.subplot(2,3,6)
+#		sp = get_neuron_entry(Stellates, 'mp')
+#		plt.plot(sp, 'bo')
+#		plt.ylim((0,1))
 		
 		plt.draw()
 		#plt.savefig('./fig/%d.png'%plotInd)

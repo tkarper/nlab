@@ -60,15 +60,16 @@ void Neuron_HH::step(double t, double dt, double input)
 	else
 		ipNeg -= input;
 
-//	double ip = ipPos - ipNeg;
-//	V = Vp + dt*(ip - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
-//	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
-//	m = mp + dt*phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp);
-
-	V = Vp + dt*(-(gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
-	n = np + dt*phi*((ipNeg + alpha_n(Vp))*(1-np) - beta_n(Vp)*np);
-	m = mp + dt*phi*((ipPos + alpha_m(Vp))*(1-mp) - beta_m(Vp)*mp);
+	double ip = ipPos - ipNeg;
+	V = Vp + dt*(ip - (gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
+	n = np + dt*phi*(alpha_n(Vp)*(1-np) - beta_n(Vp)*np);
+	m = mp + dt*phi*(alpha_m(Vp)*(1-mp) - beta_m(Vp)*mp);
 	h = hp + dt*phi*(alpha_h(Vp)*(1-hp) - beta_h(Vp)*hp);
+	
+//	V = Vp + dt*(-(gL*(Vp-EL) + gK*pow(np,4)*(Vp-EK) + gNa*pow(mp,3)*hp*(Vp-ENa)))/CM;
+//	n = np + dt*phi*((ipNeg + alpha_n(Vp))*(1-np) - beta_n(Vp)*np);
+//	m = mp + dt*phi*((ipPos + alpha_m(Vp))*(1-mp) - beta_m(Vp)*mp);
+//	h = hp + dt*phi*(alpha_h(Vp)*(1-hp) - beta_h(Vp)*hp);
 
 //	s = sp + dt*(alpha*(1-sp)*heaviside(Vp - VT) - beta*sp);
 	s = sp + dt*phi*(alpha*fmax(Vp-VT,0)/(VM-VT) - beta*sp);
