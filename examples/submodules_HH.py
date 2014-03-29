@@ -12,10 +12,10 @@ nStell = 50		# Number of stellate cells
 dt = 0.01
 
 # Connection strengths
-I = 0.5			# External exitatory input
+I = 1.0			# External exitatory input
 s2in = 1.0		# Stellate to interneuron
 in2s = -1.0		# Interneuron to stellate
-hd2s = 2.0		# HD cell to stellate
+hd2s = 10.0		# HD cell to stellate
 
 
 
@@ -27,6 +27,8 @@ print('Initializing...')
 Stellates = np.array([Neuron_HH() for _ in range(0,nStell)])
 cvar.Neuron_HH_alpha = 2
 cvar.Neuron_HH_beta = 2
+for i in range(0,nStell):
+	Stellates[i].Vp += 2*(random.random()-1)
 
 
 # Create theta oscillator and link to stellates
@@ -36,12 +38,12 @@ connect_one_to_many(Theta[0], Stellates, I)
 #	Stellates[i].I = I
 		
 # Create interneurons and link to one another
-nIntNeuro = 5	# Number of interneurons
+nIntNeuro = int(0.3*nStell)		# Number of interneurons
 IntNeuros = np.array([Neuron_HH() for _ in range(0,nIntNeuro)])
 connect_many_to_many(IntNeuros, IntNeuros, in2s)
 
 # Link interneurons to stellate cells
-nSPerIN = 30	# Number of stellates per submodule
+nSPerIN = int(0.6*nStell)	# Number of stellates per submodule
 ## Uniformly random sample
 #for i in range(0,nIntNeuro):
 #	submodInd = random.sample(xrange(nStell), nSPerIN)
@@ -65,7 +67,7 @@ for i in range(0,nIntNeuro):
 # Create head cells
 nHead = 2		# Number of head cells
 #Heads = np.array([Neuron() for _ in range(0,nHead)])
-Heads = np.array([Neuron_Osc(10, 1, 4), Neuron_Osc(5, 0, 0)])
+Heads = np.array([Neuron_Osc(10, 1, 1), Neuron_Osc(5, 0, 0)])
 
 # Link HD cells to stellates
 Nh2sConns = 1	# Number of head to stellate connections per stellate cell
