@@ -8,16 +8,16 @@ import random
 import matplotlib.pyplot as plt
 
 # Discretization parameters
-nStell = 50		# Number of stellate cells
+nStell = 100		# Number of stellate cells
 dt = 0.01
 
 # Connection strengths
 I = 0.0			# External exitatory input
-th2s = 0.0		# Theta oscillation input to stellates
+th2s = 1.0		# Theta oscillation input to stellates
 s2in = 1.0		# Stellate to interneuron
 in2s = -1.0		# Interneuron to stellate
-hd2s = 10.0		# HD cell to stellate
-
+hd2s = 3.0		# HD cell to stellate
+cvar.Neuron_Ack_gh = 0
 
 
 def get_neuron_item(neurArr, varname):
@@ -43,15 +43,15 @@ for i in range(0,nStell):
 
 
 # Create theta oscillator and link to stellates
-Theta = np.array([Neuron_Osc(10, 1, 1)])	# Period, duration, strength
+Theta = np.array([Neuron_Osc(20, 3, 1)])	# Period, duration, strength
 connect_one_to_many(Theta[0], Stellates, th2s)
 #for i in range(0,nStell):
 #	Stellates[i].I = I
 
 		
 # Create interneurons and link to one another
-nIntNeuro = int(0.3*nStell)		# Number of interneurons
-IntNeuros = np.array([Neuron_HH() for _ in range(0,nIntNeuro)])
+nIntNeuro = int(0.05*nStell)		# Number of interneurons
+IntNeuros = np.array([Neuron_Ack() for _ in range(0,nIntNeuro)])
 connect_many_to_many(IntNeuros, IntNeuros, in2s)
 
 # Link interneurons to stellate cells
@@ -79,7 +79,7 @@ for i in range(0,nIntNeuro):
 # Create head cells
 nHead = 2		# Number of head cells
 #Heads = np.array([Neuron() for _ in range(0,nHead)])
-Heads = np.array([Neuron_Osc(10, 1, 1), Neuron_Osc(5, 0, 0)])
+Heads = np.array([Neuron_Osc(10, 3, 1), Neuron_Osc(5, 0, 0)])
 
 # Link HD cells to stellates
 Nh2sConns = 1	# Number of head to stellate connections per stellate cell
@@ -101,6 +101,9 @@ plt.figure()
 plt.ion()
 
 
+tHist = []
+hist = []
+
 # MAIN TIMELOOP
 while(True):
 	t = t+dt
@@ -119,6 +122,14 @@ while(True):
 	stepNetwork(Stellates, t, dt)
 	stepNetwork(IntNeuros, t, dt)
 	stepNetwork(Heads, t, dt)
+	
+	# Check if stellates have fired
+	for i in range(0, 20):
+		if Stellates[i].V>0 and Stellates[i].V < Stellates[i].VP:
+				tHist.append(t)
+				hist.append(i)
+	
+	# Move to next timestep
 	updateNetwork(Stellates)
 	updateNetwork(IntNeuros)
 	updateNetwork(Theta)
@@ -131,18 +142,15 @@ while(True):
 			Heads[i].sp = 0
 	
 	# Plot data
-	plotInterval = 2.0
+	plotInterval = 10.0
 	if(fmod(t, plotInterval) < dt):
 		print('t=%f'%t)
 #		print('Theta:sp = %f'%Theta[0].sp)
 		
 		plt.clf()
-#		sp = get_neuron_item(Stellates, 'sp')
 		sp = get_neuron_item(Stellates, 'V')
 		plt.subplot(2,3,1)
 		plt.plot(sp, 'gs')
-#		plt.plot(x, dp, 'o')
-#		plt.ylim((0,1))
 		plt.ylim((-100,100))
 		plt.title('Stellate memb. pot.')
 		
@@ -159,25 +167,21 @@ while(True):
 		plt.title('Interneuron memb. pot.')
 		
 		plt.subplot(2,3,4)
-		sp = get_neuron_item(Heads, 's')
-		plt.plot(sp, 'bo')
-		plt.ylim((0,1))
-		plt.title('Head cells')
+#		sp = get_neuron_item(Heads, 's')
+#		plt.plot(sp, 'bo')
+#		plt.ylim((0,1))
+#		plt.title('Head cells')
+		plt.plot(tHist, hist, 'rs')
+		plt.xlim((t-400,t))
+		plt.title('Firing history')
 		
-		plt.subplot(2,3,5)
+		
+		plt.subplot(2,3,6)
 		sp = get_neuron_item(IntNeuros, 's')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Interneuron syn. pot.')
-
-#		plt.subplot(2,3,5)
-#		sp = get_neuron_item(Stellates, 'n')
-#		plt.plot(sp, 'bo')
-#		plt.ylim((0,1))
-#		plt.subplot(2,3,6)
-#		sp = get_neuron_item(Stellates, 'm')
-#		plt.plot(sp, 'bo')
-#		plt.ylim((0,1))
+		
 		
 		plt.draw()
 		#plt.savefig('./fig/%d.png'%plotInd)
