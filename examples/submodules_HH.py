@@ -12,10 +12,19 @@ nStell = 50		# Number of stellate cells
 dt = 0.01
 
 # Connection strengths
-I = 1.0			# External exitatory input
+I = 0.0			# External exitatory input
+th2s = 0.0		# Theta oscillation input to stellates
 s2in = 1.0		# Stellate to interneuron
 in2s = -1.0		# Interneuron to stellate
 hd2s = 10.0		# HD cell to stellate
+
+
+
+def get_neuron_item(neurArr, varname):
+	arr = np.zeros(neurArr.shape)
+	for i  in range(neurArr.size):
+		arr[i] = type(neurArr[i]).__swig_getmethods__.get(varname, None)(neurArr[i])
+	return arr
 
 
 
@@ -24,18 +33,21 @@ print('Initializing...')
 
 
 # Create stellate cells
-Stellates = np.array([Neuron_HH() for _ in range(0,nStell)])
-cvar.Neuron_HH_alpha = 2
-cvar.Neuron_HH_beta = 2
+#Stellates = np.array([Neuron_HH() for _ in range(0,nStell)])
+#cvar.Neuron_HH_alpha = 2
+#cvar.Neuron_HH_beta = 2
+Stellates = np.array([Neuron_Ack() for _ in range(0,nStell)])
 for i in range(0,nStell):
-	Stellates[i].Vp += 2*(random.random()-1)
+	Stellates[i].VP += 2*(random.random()-1)
+	Stellates[i].I = I
 
 
 # Create theta oscillator and link to stellates
 Theta = np.array([Neuron_Osc(10, 1, 1)])	# Period, duration, strength
-connect_one_to_many(Theta[0], Stellates, I)
+connect_one_to_many(Theta[0], Stellates, th2s)
 #for i in range(0,nStell):
 #	Stellates[i].I = I
+
 		
 # Create interneurons and link to one another
 nIntNeuro = int(0.3*nStell)		# Number of interneurons
@@ -58,7 +70,7 @@ for i in range(0,nIntNeuro):
 	submodInd = np.round(i*nStell/float(nIntNeuro) + nStell*distr[...,i]).astype(int)
 	# Compute indices modulo nStell, avoiding negative index values
 	submodInd = np.mod(nStell + np.mod(submodInd, nStell), nStell)
-	print(submodInd)
+#	print(submodInd)
 	# Extract the submodule and create connections to and from interneuron i
 	submod = Stellates[submodInd]
 	connect_many_to_one(submod, IntNeuros[i], s2in)
@@ -112,15 +124,21 @@ while(True):
 	updateNetwork(Theta)
 	updateNetwork(Heads)
 	
+	# Turn off external input for an initial phase
+	if (t < 10):
+		Theta[0].sp = 0
+		for i in range(0,nHead):
+			Heads[i].sp = 0
+	
 	# Plot data
-	plotInterval = 1.0
+	plotInterval = 2.0
 	if(fmod(t, plotInterval) < dt):
 		print('t=%f'%t)
 #		print('Theta:sp = %f'%Theta[0].sp)
 		
 		plt.clf()
-#		sp = get_neuron_entry(Stellates, 'sp')
-		sp = get_neuron_entry(Stellates, 'Vp')
+#		sp = get_neuron_item(Stellates, 'sp')
+		sp = get_neuron_item(Stellates, 'V')
 		plt.subplot(2,3,1)
 		plt.plot(sp, 'gs')
 #		plt.plot(x, dp, 'o')
@@ -129,35 +147,35 @@ while(True):
 		plt.title('Stellate memb. pot.')
 		
 		plt.subplot(2,3,2)
-		sp = get_neuron_entry(Stellates, 'sp')
+		sp = get_neuron_item(Stellates, 'msyn')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Stellate syn. pot.')
 		
 		plt.subplot(2,3,3)
-		sp = get_neuron_entry(IntNeuros, 'Vp')
+		sp = get_neuron_item(IntNeuros, 'V')
 		plt.plot(sp, 'gs')
 		plt.ylim((-100,100))
 		plt.title('Interneuron memb. pot.')
 		
 		plt.subplot(2,3,4)
-		sp = get_neuron_entry(Heads, 'sp')
+		sp = get_neuron_item(Heads, 's')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Head cells')
 		
 		plt.subplot(2,3,5)
-		sp = get_neuron_entry(IntNeuros, 'sp')
+		sp = get_neuron_item(IntNeuros, 's')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Interneuron syn. pot.')
 
 #		plt.subplot(2,3,5)
-#		sp = get_neuron_entry(Stellates, 'np')
+#		sp = get_neuron_item(Stellates, 'n')
 #		plt.plot(sp, 'bo')
 #		plt.ylim((0,1))
 #		plt.subplot(2,3,6)
-#		sp = get_neuron_entry(Stellates, 'mp')
+#		sp = get_neuron_item(Stellates, 'm')
 #		plt.plot(sp, 'bo')
 #		plt.ylim((0,1))
 		

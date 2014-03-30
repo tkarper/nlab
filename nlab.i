@@ -11,6 +11,7 @@
 	#include <iostream>
 	#include <string>
     #include "Neuron.h"
+    #include "Neuron_Ack.h"
     #include "Neuron_TIF.h"
     #include "Neuron_HH.h"
     #include "Neuron_Osc.h"
@@ -54,6 +55,7 @@
 %include "Neuron_TIF.h"
 %include "Neuron_ML.h"
 %include "Neuron_HH.h"
+%include "Neuron_Ack.h"
 %include "Neuron_Osc.h"
 %include "ConMat.h"
 %include "nlab.h"

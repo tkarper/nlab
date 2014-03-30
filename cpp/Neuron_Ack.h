@@ -1,12 +1,12 @@
-#ifndef NEURON_HH_INC
-#define NEURON_HH_INC
+#ifndef NEURON_ACK_INC
+#define NEURON_ACK_INC
 
 
 #include "Neuron.h"
 
 
 // Hodgkin-Huxley by Acker et al. (2003)
-class Neuron_HH_Acker: public Neuron
+class Neuron_Ack: public Neuron
 {
 public:
 	double V, VP;	// Synaptic potential
@@ -15,18 +15,20 @@ public:
 	double hNa, hNaP;
 	double n, nP;
 	double mNap, mNapP;
-	double mKs, mKsP;
+//	double mKs, mKsP;
+	double mhf, mhfP;
+	double mhs, mhsP;
+	double msyn, msynP;
 	
-	double n, np;	// K+ channel activation
-	double m, mp;	// Na+ channel activation
-	double h, hp;	// Na+ channel deactivation
 	// Model parameters, common to all neurons of this class
-	static double phi, gNa, gK, gL, ENa, EK, EL, CM, alpha, beta, VT, VM;
+	static double VL, VNa, VK, Vh, Vsyn,
+		gNap, gh, gsyn, gL, gNa, gk,
+		CM;		// Time scaling factor
 	
-	Neuron_HH();
+	Neuron_Ack();
 	void step(double t, double dt, double input_);
 	// Switch both s, V and n with the previous values
-	void update() { Neuron::update(); np = n; Vp = V; mp=m; hp=h;}
+	void update() { Neuron::update(); VP=V; mNaP=mNa; hNaP=hNa; nP=n; mNapP=mNap; mhfP=mhf; mhsP=mhs; msynP=msyn; }
 };
 
 
