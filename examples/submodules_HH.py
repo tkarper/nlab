@@ -13,10 +13,10 @@ dt = 0.01
 
 # Connection strengths
 I = 0.0			# External exitatory input
-th2s = 1.0		# Theta oscillation input to stellates
+th2s = 2.0		# Theta oscillation input to stellates
 s2in = 1.0		# Stellate to interneuron
 in2s = -1.0		# Interneuron to stellate
-hd2s = 3.0		# HD cell to stellate
+hd2s = 4.0		# HD cell to stellate
 cvar.Neuron_Ack_gh = 0
 
 
@@ -43,7 +43,7 @@ for i in range(0,nStell):
 
 
 # Create theta oscillator and link to stellates
-Theta = np.array([Neuron_Osc(20, 3, 1)])	# Period, duration, strength
+Theta = np.array([Neuron_Osc(50, 3, 1)])	# Period, duration, strength
 connect_one_to_many(Theta[0], Stellates, th2s)
 #for i in range(0,nStell):
 #	Stellates[i].I = I
@@ -79,7 +79,7 @@ for i in range(0,nIntNeuro):
 # Create head cells
 nHead = 2		# Number of head cells
 #Heads = np.array([Neuron() for _ in range(0,nHead)])
-Heads = np.array([Neuron_Osc(10, 3, 1), Neuron_Osc(5, 0, 0)])
+Heads = np.array([Neuron_Osc(25, 5, 1), Neuron_Osc(5, 0, 0)])
 
 # Link HD cells to stellates
 Nh2sConns = 1	# Number of head to stellate connections per stellate cell
