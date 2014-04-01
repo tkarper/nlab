@@ -1,9 +1,9 @@
 import sys
 sys.path.append('../')
 
+from nlab import *
 from math import *
 import numpy as np
-from nlab import *
 import random
 import matplotlib.pyplot as plt
 
@@ -28,17 +28,21 @@ def get_neuron_item(neurArr, varname):
 
 theta = Neuron_Osc(20, 3, 1)
 
-nStell = 5
 nInter = 2
+nSPIN = 5	# Stellates Per InterNeuron
+nStell = nSPIN*nInter
 stell = np.array([Neuron_Ack() for _ in range(0,nStell)])
-inter = Neuron_Ack()
+inter = np.array([Neuron_Ack() for _ in range(0,nInter)])
+
 for i in range(0,nStell):
-	stell[i].I = I #*(1+i*0.1/nStell) #I*(1+0.1*random.random())
+	stell[i].I = I #* (1 + (i/nSPIN)*1.0) #I*(1+0.1*random.random())
 #	stell[i].connect(theta, th2s*(1+i*0.1/nStell))
 #	stell[i].VP += random.random()*10
+for i in range(nInter):
+	submod = stell[i*nInter:(i+1)*nInter]
+	connect_many_to_one(submod, inter[i], s2in)
+	connect_one_to_many(inter[i], submod, in2s)
 
-connect_many_to_one(stell, inter, s2in)
-connect_one_to_many(inter, stell, in2s)
 connect_one_to_many(theta, stell, th2s)
 
 t = 0.0
@@ -47,7 +51,7 @@ m = 0
 
 tHist = []
 hist = [[] for _ in range(nStell)]
-intHist = []
+intHist = [[] for _ in range(nInter)]
 thetaHist = []
 
 # MAIN TIMELOOP
@@ -56,10 +60,10 @@ while(t<500):
 	m = m+1
 	
 	# Update neural network
-	inter.step(t,dt,0)
+	stepNetwork(inter, t, dt)
 	theta.step(t,dt,0)
 	stepNetwork(stell, t, dt)
-	inter.update()
+	updateNetwork(inter)
 	theta.update()
 	updateNetwork(stell)
 	
@@ -67,7 +71,8 @@ while(t<500):
 		tHist.append(t)
 		for i in range(nStell):
 			hist[i].append(stell[i].V)
-		intHist.append(inter.V)
+		for i in range(nInter):
+			intHist[i].append(inter[i].V)
 		thetaHist.append(theta.s)
 
 
@@ -78,9 +83,10 @@ for i in range(nStell):
 	plt.subplot(nPlot,1,i+1)
 	plt.plot(tHist,hist[i])
 	plt.xlim((0, tHist[-1]))
-plt.subplot(nPlot,1,nStell+1)
-plt.plot(tHist,intHist,'r')
-plt.xlim((0, tHist[-1]))
-plt.subplot(nPlot,1,nStell+2)
+for i in range(nInter):
+	plt.subplot(nPlot,1,nStell+1+i)
+	plt.plot(tHist,intHist[i],'r')
+	plt.xlim((0, tHist[-1]))
+plt.subplot(nPlot,1,nStell+nInter)
 plt.plot(tHist,thetaHist,'g')
 plt.xlim((0, tHist[-1]))
