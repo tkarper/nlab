@@ -18,7 +18,6 @@ public:
 //	double mKs, mKsP;
 	double mhf, mhfP;
 	double mhs, mhsP;
-	double msyn, msynP;
 	
 	// Model parameters, common to all neurons of this class
 	static double VL, VNa, VK, Vh, Vsyn,
@@ -28,7 +27,7 @@ public:
 	Neuron_Ack();
 	void step(double t, double dt, double input_);
 	// Switch both s, V and n with the previous values
-	void update() { Neuron::update(); VP=V; mNaP=mNa; hNaP=hNa; nP=n; mNapP=mNap; mhfP=mhf; mhsP=mhs; msynP=msyn; }
+	void update() { Neuron::update(); VP=V; mNaP=mNa; hNaP=hNa; nP=n; mNapP=mNap; mhfP=mhf; mhsP=mhs; }
 };
 
 
