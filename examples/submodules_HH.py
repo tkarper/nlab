@@ -124,7 +124,7 @@ while(True):
 	stepNetwork(Heads, t, dt)
 	
 	# Check if stellates have fired
-	for i in range(0, 20):
+	for i in range(0, nStell):
 		if Stellates[i].V>0 and Stellates[i].V < Stellates[i].VP:
 				tHist.append(t)
 				hist.append(i)
@@ -149,34 +149,39 @@ while(True):
 		
 		plt.clf()
 		sp = get_neuron_item(Stellates, 'V')
-		plt.subplot(2,3,1)
+#		plt.subplot(2,3,1)
+		plt.subplot2grid((2,3), (0,0))
 		plt.plot(sp, 'gs')
-		plt.ylim((-100,100))
+		plt.ylim((-70,-10))
 		plt.title('Stellate memb. pot.')
 		
-		plt.subplot(2,3,2)
+#		plt.subplot(2,3,2)
 		sp = get_neuron_item(Stellates, 'msyn')
+		plt.subplot2grid((2,3), (0,1))
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
 		plt.title('Stellate syn. pot.')
 		
-		plt.subplot(2,3,3)
-		sp = get_neuron_item(IntNeuros, 'V')
-		plt.plot(sp, 'gs')
-		plt.ylim((-100,100))
-		plt.title('Interneuron memb. pot.')
-		
-		plt.subplot(2,3,4)
+#		plt.subplot(2,3,5)
 #		sp = get_neuron_item(Heads, 's')
 #		plt.plot(sp, 'bo')
 #		plt.ylim((0,1))
 #		plt.title('Head cells')
+		plt.subplot2grid((2,3), (0,2), rowspan=2)
 		plt.plot(tHist, hist, 'rs')
 		plt.xlim((t-400,t))
 		plt.title('Firing history')
 		
+#		plt.subplot(2,3,4)
+		plt.subplot2grid((2,3), (1,0))
+		sp = get_neuron_item(IntNeuros, 'V')
+		plt.plot(sp, 'gs')
+		plt.ylim((-70,-10))
+		plt.title('Interneuron memb. pot.')
 		
-		plt.subplot(2,3,6)
+		
+#		plt.subplot(2,3,6)
+		plt.subplot2grid((2,3), (1,1))
 		sp = get_neuron_item(IntNeuros, 's')
 		plt.plot(sp, 'bo')
 		plt.ylim((0,1))
