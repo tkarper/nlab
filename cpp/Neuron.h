@@ -12,8 +12,10 @@ public:
 	std::vector<Neuron*>* con;		// list of connections
 	std::vector<double>* weight;	    // weight of each connection
 	
-	double s, sp;		// current and previous spike value
+	double s, sp;	// current and previous spike value
 	double I;		// external input
+	double Vsyn;	// Synaptic reversal potential. Only meaningful for HH-type models
+	double gsyn;	// Conductance for synapse
 	
 	Neuron();
 	virtual ~Neuron();

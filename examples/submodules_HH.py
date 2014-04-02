@@ -8,14 +8,14 @@ import random
 import matplotlib.pyplot as plt
 
 # Discretization parameters
-nStell = 100		# Number of stellate cells
+nStell = 50		# Number of stellate cells
 dt = 0.01
 
 # Connection strengths
 I = 0.0			# External exitatory input
 th2s = 2.0		# Theta oscillation input to stellates
-s2in = 1.0		# Stellate to interneuron
-in2s = -1.0		# Interneuron to stellate
+s2in = 2.0		# Stellate to interneuron
+in2s = -3.0		# Interneuron to stellate
 hd2s = 4.0		# HD cell to stellate
 cvar.Neuron_Ack_gh = 0
 
@@ -38,7 +38,7 @@ print('Initializing...')
 #cvar.Neuron_HH_beta = 2
 Stellates = np.array([Neuron_Ack() for _ in range(0,nStell)])
 for i in range(0,nStell):
-	Stellates[i].VP += 2*(random.random()-1)
+	Stellates[i].VP += random.random()*10
 	Stellates[i].I = I
 
 
@@ -55,26 +55,26 @@ IntNeuros = np.array([Neuron_Ack() for _ in range(0,nIntNeuro)])
 connect_many_to_many(IntNeuros, IntNeuros, in2s)
 
 # Link interneurons to stellate cells
-nSPerIN = int(0.6*nStell)	# Number of stellates per submodule
-## Uniformly random sample
-#for i in range(0,nIntNeuro):
-#	submodInd = random.sample(xrange(nStell), nSPerIN)
-#	submod = Stellates[submodInd]
-#	connect_many_to_one(submod, IntNeuros[i], s2in)
-#	connect_one_to_many(IntNeuros[i], submod, in2s)
-## Lateral normal distribution
-distr = np.random.normal(0.0, 0.2, (nStell, nIntNeuro))
-distr = distr
+nSPerIN = int(0.2*nStell)	# Number of stellates per submodule
+# Uniformly random sample
 for i in range(0,nIntNeuro):
-	# Convert normally distributed numbers to indices in [0, nStell)
-	submodInd = np.round(i*nStell/float(nIntNeuro) + nStell*distr[...,i]).astype(int)
-	# Compute indices modulo nStell, avoiding negative index values
-	submodInd = np.mod(nStell + np.mod(submodInd, nStell), nStell)
-#	print(submodInd)
-	# Extract the submodule and create connections to and from interneuron i
+	submodInd = random.sample(xrange(nStell), nSPerIN)
 	submod = Stellates[submodInd]
 	connect_many_to_one(submod, IntNeuros[i], s2in)
 	connect_one_to_many(IntNeuros[i], submod, in2s)
+### Lateral normal distribution (with replacement!!!)
+#distr = np.random.normal(0.0, 0.2, (nStell, nIntNeuro))
+#distr = distr
+#for i in range(0,nIntNeuro):
+#	# Convert normally distributed numbers to indices in [0, nStell)
+#	submodInd = np.round(i*nStell/float(nIntNeuro) + nStell*distr[...,i]).astype(int)
+#	# Compute indices modulo nStell, avoiding negative index values
+#	submodInd = np.mod(nStell + np.mod(submodInd, nStell), nStell)
+#	print(np.sort(submodInd))
+#	# Extract the submodule and create connections to and from interneuron i
+#	submod = Stellates[submodInd]
+#	connect_many_to_one(submod, IntNeuros[i], s2in)
+#	connect_one_to_many(IntNeuros[i], submod, in2s)
 
 # Create head cells
 nHead = 2		# Number of head cells
@@ -144,7 +144,7 @@ while(True):
 	# Plot data
 	plotInterval = 10.0
 	if(fmod(t, plotInterval) < dt):
-		print('t=%f'%t)
+#		print('t=%f'%t)
 #		print('Theta:sp = %f'%Theta[0].sp)
 		
 		plt.clf()

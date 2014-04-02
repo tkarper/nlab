@@ -7,16 +7,17 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
-cvar.Neuron_Ack_gh = 0
+
 
 # Discretization parameters
 dt = 0.01
 
 # Connection strengths
-I = 0.0			# External exitatory input
-th2s = 7.0
-in2s = -2
-s2in = 2
+I = 1.5			# External exitatory input
+th2s = 0 #7.0
+in2s = 0 #-2
+in2in = 0 #-10.0
+s2in = 3
 
 
 def get_neuron_item(neurArr, varname):
@@ -32,30 +33,40 @@ nInter = 2
 nSPIN = 5	# Stellates Per InterNeuron
 nStell = nSPIN*nInter
 stell = np.array([Neuron_Ack() for _ in range(0,nStell)])
-inter = np.array([Neuron_Ack() for _ in range(0,nInter)])
+inter = np.array([Neuron_Ack() for _ in range(0,nInter)])\
 
-for i in range(0,nStell):
-	stell[i].I = I #* (1 + (i/nSPIN)*1.0) #I*(1+0.1*random.random())
-#	stell[i].connect(theta, th2s*(1+i*0.1/nStell))
-#	stell[i].VP += random.random()*10
+
+for i in range(nStell):
+	stell[i].I = I
+
+submod = [[] for _ in range(nInter)]
 for i in range(nInter):
-	submod = stell[i*nInter:(i+1)*nInter]
-	connect_many_to_one(submod, inter[i], s2in)
-	connect_one_to_many(inter[i], submod, in2s)
+	submod[i] = stell[i*nSPIN:(i+1)*nSPIN]
+	connect_many_to_one(submod[i], inter[i], s2in)
+	connect_one_to_many(inter[i], submod[i], in2s)
 
-connect_one_to_many(theta, stell, th2s)
+for i in range(nInter):
+	connect_one_to_many(theta, submod[i], th2s*(1+i*0.1))
+#	for j in range(nSPIN):
+#		submod[i][j].I = I * (1 + i*0.3)
+#		stell[i].connect(theta, th2s*(1+i*0.1/nStell))
+#		submod[i][j].VP += random.random()*20
+connect_many_to_many(inter, inter, in2in)
+#connect_one_to_many(theta, stell, th2s)
 
 t = 0.0
 m = 0
 
 
 tHist = []
-hist = [[] for _ in range(nStell)]
+sHist = [[] for _ in range(nStell)]
 intHist = [[] for _ in range(nInter)]
 thetaHist = []
 
+
+
 # MAIN TIMELOOP
-while(t<500):
+while(t<600):
 	t = t+dt
 	m = m+1
 	
@@ -67,26 +78,28 @@ while(t<500):
 	theta.update()
 	updateNetwork(stell)
 	
+	
 	if (m%10 == 0):
 		tHist.append(t)
 		for i in range(nStell):
-			hist[i].append(stell[i].V)
+			sHist[i].append(stell[i].V)
 		for i in range(nInter):
 			intHist[i].append(inter[i].V)
 		thetaHist.append(theta.s)
 
 
-nPlot = nStell+2
+nPlot = nStell+nInter+1
 plt.figure()
 plt.ion()
-for i in range(nStell):
-	plt.subplot(nPlot,1,i+1)
-	plt.plot(tHist,hist[i])
-	plt.xlim((0, tHist[-1]))
 for i in range(nInter):
-	plt.subplot(nPlot,1,nStell+1+i)
-	plt.plot(tHist,intHist[i],'r')
+	for j in range(nSPIN):
+		k = i*nSPIN+j
+		plt.subplot(nPlot,1,k+i+1)
+		plt.plot(tHist,sHist[k], 'r')
+		plt.xlim((0, tHist[-1]))
+	plt.subplot(nPlot,1,(i+1)*nSPIN+i+1)
+	plt.plot(tHist,intHist[i],'b')
 	plt.xlim((0, tHist[-1]))
-plt.subplot(nPlot,1,nStell+nInter)
+plt.subplot(nPlot,1,nStell+nInter+1)
 plt.plot(tHist,thetaHist,'g')
 plt.xlim((0, tHist[-1]))

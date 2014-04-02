@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <cmath>
 #include <iostream>
 #include "Neuron_Ack.h"
@@ -8,9 +9,10 @@ double Neuron_Ack::VL	= -65;
 double Neuron_Ack::VNa	= 55;
 double Neuron_Ack::VK	= -90;
 double Neuron_Ack::Vsyn	= -20;	// ???
+double Neuron_Ack::Vh	= -20;
 double Neuron_Ack::gNa	= 52;
 double Neuron_Ack::gNap	= 0.5;
-double Neuron_Ack::gh	= 1.5;
+double Neuron_Ack::gh	= 0; //1.5;
 double Neuron_Ack::gsyn	= 0.006;
 double Neuron_Ack::gL	= 0.5;
 double Neuron_Ack::gk	= 11;
@@ -28,7 +30,7 @@ mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0), mhf(0), mhfP(0
 void Neuron_Ack::step(double t, double dt, double input)
 {
 	// Compute input (synaptic potentials) coming from other neurons
-	double synPot;
+	double synPot = 0;
 	for(size_t i=0; i<con->size(); i++)
 	{
 		Neuron* nr = con->at(i);

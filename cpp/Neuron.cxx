@@ -2,7 +2,9 @@
 #include <cmath>
 #include <iostream>
 
-Neuron::Neuron()
+Neuron::Neuron() :
+Vsyn(0),
+gsyn(1)
 {
 	con 	= new nvector();
 	weight	= new dvector();
