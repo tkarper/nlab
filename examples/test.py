@@ -48,10 +48,10 @@ for i in range(nInter):
 
 for i in range(nInter):
 	connect_one_to_many(theta, submod[i], th2s*(1+i*0.1))
-#	for j in range(nSPIN):
+	for j in range(nSPIN):
 #		submod[i][j].I = I * (1 + i*0.3)
 #		stell[i].connect(theta, th2s*(1+i*0.1/nStell))
-#		submod[i][j].VP += random.random()*20
+		submod[i][j].VP += random.random()*20
 connect_many_to_many(inter, inter, in2in)
 #connect_one_to_many(theta, stell, th2s)
 
