@@ -32,8 +32,9 @@ theta = Neuron_Osc(20, 3, 1)
 nInter = 2
 nSPIN = 5	# Stellates Per InterNeuron
 nStell = nSPIN*nInter
-stell = np.array([Neuron_Ack() for _ in range(0,nStell)])
-inter = np.array([Neuron_Ack() for _ in range(0,nInter)])\
+stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
+inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
+
 
 
 for i in range(nStell):
