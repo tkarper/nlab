@@ -20,7 +20,7 @@ public:
 	static double VL, VNa, VK,
 		gNap, gL, gNa, gk,
 		CM;		// Time scaling factor
-	double a_r, a_d;	// Rise/decay rate of synaptic conductance
+	double a_r, a_d;	// Rise/decay rate of synaptic conductance, measured in mM^(-1)ms^(-1)
 	
 	Neuron_Stel();
 	void step(double t, double dt, double input_);

@@ -15,7 +15,7 @@ public:
 	double s, sp;	// current and previous spike value
 	double I;		// external input
 	double Vsyn;	// Synaptic reversal potential. Only meaningful for HH-type models
-	double gsyn;	// Conductance for synapse
+	double gsyn;	// Conductance for synapse, measured in mS (milli-Siemens)
 	
 	Neuron();
 	virtual ~Neuron();

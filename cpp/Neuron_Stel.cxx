@@ -55,14 +55,14 @@ void Neuron_Stel::step(double t, double dt, double input)
 	hNa = hNaP + dt*(alpha_hNa*(1-hNaP) - beta_hNa*hNaP);
 	mNap = mNapP + dt*(alpha_mNap*(1-mNapP) - beta_mNap*mNapP);
 	n = nP + dt*(alpha_n*(1-nP) - beta_n*nP);
-	s = sp + dt*((VP>-20 ? a_r : 0.0)*(1-sp) - a_d*sp);		// What should the -20 constant be???
+	s = sp + dt*((VP>0 ? a_r : 0.0)*(1-sp) - a_d*sp);		// What should the transmitter pulse threshold be???
 }
 
 
 
 Neuron_IntN::Neuron_IntN()
 {
-	Vsyn = -60;
+	Vsyn = -75;
 	a_r = 5;
 	a_d = 0.18;
 }
