@@ -16,12 +16,23 @@ double Neuron_Stel::CM	= 1.5;
 
 
 Neuron_Stel::Neuron_Stel() :
-V(VL), VP(VL), mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0)
+V(VL), VP(VL), mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0),
+mDep(1), mDepP(1),
+mFac(1), mFacP(1),
+mSyn(0), mSynP(0)
 {
 	Vsyn = 0;
 	gsyn = 0.006;
 	a_r = 1.1;
 	a_d = 0.19;
+	mDep0 = 1.0;
+	mFac0 = 0.7;
+	mDep = mDep0; mDepP = mDep0;
+	mFac = mFac0; mFacP = mFac0;
+	mDepRise = 0.025;
+	mDepDecay = 1/400.0;
+	mFacRise = 0.1;
+	mFacDecay = 1/50.0;
 }
 
 
@@ -45,6 +56,10 @@ void Neuron_Stel::step(double t, double dt, double input)
 	double beta_hNa = 1/(1+exp(-(VP+7)/10));
 	double beta_n = 0.125*exp(-(VP+37)/80);
 	double beta_mNap = exp(-(VP+38)/6.5)/(0.15*(1+exp(-(VP+38)/6.5)));
+	
+	// Spike indicator: equal to 1 if neuron is spiking, otherwise 0
+	// What should the transmitter pulse threshold be???
+	double spikeInd = (VP>0 ? 1.0 : 0.0);
 
 	V = VP + dt/CM*(I+input - (
 		(gNa*pow(mNaP,3)*hNaP + gNap*mNap)*(VP-VNa) + 
@@ -55,7 +70,10 @@ void Neuron_Stel::step(double t, double dt, double input)
 	hNa = hNaP + dt*(alpha_hNa*(1-hNaP) - beta_hNa*hNaP);
 	mNap = mNapP + dt*(alpha_mNap*(1-mNapP) - beta_mNap*mNapP);
 	n = nP + dt*(alpha_n*(1-nP) - beta_n*nP);
-	s = sp + dt*((VP>0 ? a_r : 0.0)*(1-sp) - a_d*sp);		// What should the transmitter pulse threshold be???
+	mSyn = mSynP + dt*(a_r*spikeInd*(1-mSynP) - a_d*mSynP);
+	mDep = mDepP + dt*(-spikeInd*mDepP*mDepRise + (mDep0-mDepP)*mDepDecay);
+	mFac = mFacP + dt*(spikeInd*(1-mFacP)*mFacRise + (mFac0-mFacP)*mFacDecay);
+	s = mSyn * mDep * mFac;
 }
 
 

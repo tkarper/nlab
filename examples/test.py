@@ -13,11 +13,12 @@ import matplotlib.pyplot as plt
 dt = 0.01
 
 # Connection strengths
-I = 1.4			# External exitatory input
+I = 8.0			# External exitatory input
 th2s = 0 #7.0
-in2s = 5
+in2s = 0#5
 in2in = 0#5
 s2in = 6
+
 
 
 def get_neuron_item(neurArr, varname):
@@ -29,9 +30,9 @@ def get_neuron_item(neurArr, varname):
 
 theta = Neuron_Osc(20, 3, 1)
 
-nInter = 2
-nSPIN = 10	# Stellates Per InterNeuron
-nStell = nSPIN*nInter
+nInter = 1
+nSPerIN = 5	# Stellates Per InterNeuron
+nStell = nSPerIN*nInter
 stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
 inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
 
@@ -39,8 +40,9 @@ inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
 # Create submodule indices 'submod' and set initial data
 submod = [[] for _ in range(nInter)]
 for i in range(nInter):
-	submod[i] = stell[i*nSPIN:(i+1)*nSPIN]
-	for j in range(nSPIN):
+	submod[i] = stell[i*nSPerIN:(i+1)*nSPerIN]
+#	submod[i] = stell[random.sample(xrange(nStell), nSPerIN)]
+	for j in range(nSPerIN):
 #		submod[i][j].VP += random.random()*20
 		submod[i][j].I = I #* (1 + i*5)
 #		stell[i].connect(theta, th2s*(1+i*0.1/nStell))
@@ -69,7 +71,7 @@ thetaHist = []
 
 
 # MAIN TIMELOOP
-while(t<1200):
+while(t<300):
 	t = t+dt
 	m = m+1
 	
@@ -92,7 +94,7 @@ while(t<1200):
 		thetaHist.append(theta.s)
 
 
-plotStelS = False
+plotStelS = True
 if plotStelS:
 	nPlot = 2*nStell+nInter+1
 else:
@@ -101,8 +103,8 @@ plt.figure()
 plt.ion()
 ctr = 1
 for i in range(nInter):
-	for j in range(nSPIN):
-		k = i*nSPIN+j
+	for j in range(nSPerIN):
+		k = i*nSPerIN+j
 		plt.subplot(nPlot,1,ctr)
 		ctr += 1
 		plt.plot(tHist,sVHist[k], 'r')
