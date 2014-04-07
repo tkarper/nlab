@@ -9,20 +9,20 @@ import matplotlib.pyplot as plt
 
 # Discretization parameters
 dt = 0.01
-nStell = 16		# Number of stellate cells
-nInter = 2		# Number of interneurons
-nSPerIN = 12	# Number of stellates per submodule
-nHead = 1		# Number of head cells
+nStell = 24		# Number of stellate cells
+nInter = 1		# Number of interneurons
+nSPerIN = 15	# Number of stellates per submodule
+nHead = 4		# Number of head cells
 nHD2S = 1		# Number of head to stellate connections per stellate cell
 
 # Connection strengths
 sI = 1.0		# Dirrect current to stellate cells
-hdI = 5.0		# Direct current to HD cells
+hdI = 10.0		# Direct current to HD cells
 th2s = 0.0		# theta oscillation input to stellates
 s2in = 12.0		# Stellate to interneuron
 in2s = 15.0		# Interneuron to stellate
 hd2s = 15.0		# HD cell to stellate
-tMax = 500
+tMax = 2000
 
 
 def get_neuron_item(neurArr, varname):
@@ -62,43 +62,42 @@ for i in range(0,nStell):
 inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2s)
 
-# Link interneurons to stellate cells
+# Create submodules
 s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodules to which it belongs
+submodInd = [[] for _ in range(nInter)]
 # Uniformly random sample
 for i in range(nInter):
-	submodInd = random.sample(xrange(nStell), nSPerIN)
-	submod = stell[submodInd]
+	submodInd[i] = random.sample(xrange(nStell), nSPerIN)
+# Lateral normal distribution (with replacement!!!)
+#distr = np.random.normal(0.0, 1.0/nInter, (nStell, nInter))
+#distr = distr
+#for i in range(nInter):
+#	# Convert normally distributed numbers to indices in [0, nStell)
+#	submodInd[i] = np.round(i*nStell/float(nInter) + nStell*distr[...,i]).astype(int)
+#	# Compute indices modulo nStell, avoiding negative index values
+#	submodInd[i] = np.unique(np.mod(nStell + np.mod(submodInd[i], nStell), nStell))
+
+# Link interneurons to stellate cells
+for i in range(nInter):
+	# Extract the submodule and create connections to and from interneuron i
+	submod = stell[submodInd[i]]
 	connect_many_to_one(submod, inter[i], s2in)
 	connect_one_to_many(inter[i], submod, in2s)
-	for ind in submodInd:
+	for ind in submodInd[i]:
 		s2smInd[ind].append(i)
-### Lateral normal distribution (with replacement!!!)
-#distr = np.random.normal(0.0, 0.2, (nStell, nInter))
-#distr = distr
-#for i in range(0,nInter):
-#	# Convert normally distributed numbers to indices in [0, nStell)
-#	submodInd = np.round(i*nStell/float(nInter) + nStell*distr[...,i]).astype(int)
-#	# Compute indices modulo nStell, avoiding negative index values
-#	submodInd = np.mod(nStell + np.mod(submodInd, nStell), nStell)
-#	print(np.sort(submodInd))
-#	# Extract the submodule and create connections to and from interneuron i
-#	submod = stell[submodInd]
-#	connect_many_to_one(submod, inter[i], s2in)
-#	connect_one_to_many(inter[i], submod, in2s)
 
 # Create head cells
 #head = np.array([Neuron() for _ in range(0,nHead)])
 head = np.array([Neuron_Stel() for _ in range(0,nHead)])
-head[0].I = hdI
-head[0].mDepRise = 0
+#head[0].I = hdI
+#head[0].mDepRise = 0
 
 # Link HD cells to stellates
-s2hdInd = [[] for _ in range(nHead)]	# For each stellate, list of all HDs to which it is connected
+s2hdInd = [[] for _ in range(nStell)]	# For each stellate, list of all HDs to which it is connected
 for i in range(0,nStell):
 	headInd = random.sample(xrange(nHead), nHD2S)
 	connect_many_to_one(head[headInd], stell[i], hd2s)
-	for ind in headInd:
-		s2hdInd[ind].append(i)
+	s2hdInd[i] = headInd
 #	for j in range(0,Nh2sConns):
 #		headInd = random.randrange(nHead)
 #		stell[i].connect(head[headInd], hd2s)
@@ -110,8 +109,9 @@ for i in range(0,nStell):
 ##	stell[i].I = I
 
 
-print('Initialization finished.')
 
+print('Initialization finished.')
+print('Starting simulation')
 
 
 
@@ -139,13 +139,13 @@ while(t < tMax):
 	t = t+dt
 	m = m+1
 	
-#	# Update HD cells
+	# Update HD cells
 #	direction = 0.0
-##	direction = fmod(2*pi + pi/8.0*sin(t/10.0), 2*pi)		# Direction in radians, from x-axis
-#	for i in range(0, nHead):
-#		b = direction/(2*pi)
-#		c = 0.1
-#		head[i].s = max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
+	direction = fmod(2*pi*(1 + t/1000), 2*pi)		# Direction in radians, from x-axis
+	for i in range(0, nHead):
+		b = direction/(2*pi)
+		c = 0.25
+		head[i].I = hdI*max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
 	
 	# Update neural network
 #	stepNetwork(theta, t, dt)
@@ -231,23 +231,30 @@ while(t < tMax):
 			hdVHist[i].append(head[i].V)
 
 
+print('Simulation finished')
+
+
 # PLOT DATA
 if not plotLive:
 	plotStelS = False
 	plt.figure()
 	plt.ion()
 	if plotStelS:
-		nPlot = 2*nStell+nInter+2
+		nPlot = 2*nStell+nInter+nHead
 	else:
-		nPlot = nStell+nInter+2
+		nPlot = nStell+nInter+nHead
 	ctr = 1
 	for i in range(nStell):
 		plt.subplot(nPlot,1,ctr);	ctr += 1
 		plt.plot(tHist,sVHist[i], 'r')
 		plt.xlim((0, tHist[-1]))
-		for f in fireHist[i]:
+		for j in range(len(fireHist[i])):
+			f = fireHist[i][j]
 			plt.plot(f[0], f[1], 'rs')
-		plt.ylabel("SM:%s"%stringify(s2smInd[i]))
+#			# Print instantaneous frequency
+#			if j > 1:
+#				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
+		plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
 		if plotStelS:
 			plt.subplot(nPlot,1,ctr);	ctr += 1
 			plt.plot(tHist,sSHist[i], 'g')
