@@ -15,9 +15,11 @@ dt = 0.01
 # Connection strengths
 I = 8.0			# External exitatory input
 th2s = 0 #7.0
-in2s = 0#5
+in2s = 5
 in2in = 0#5
-s2in = 6
+s2in = 10
+nInter = 1
+nSPerIN = 10	# Stellates Per InterNeuron
 
 
 
@@ -28,10 +30,7 @@ def get_neuron_item(neurArr, varname):
 	return arr
 
 
-theta = Neuron_Osc(20, 3, 1)
 
-nInter = 1
-nSPerIN = 5	# Stellates Per InterNeuron
 nStell = nSPerIN*nInter
 stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
 inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
@@ -43,7 +42,7 @@ for i in range(nInter):
 	submod[i] = stell[i*nSPerIN:(i+1)*nSPerIN]
 #	submod[i] = stell[random.sample(xrange(nStell), nSPerIN)]
 	for j in range(nSPerIN):
-#		submod[i][j].VP += random.random()*20
+		submod[i][j].V += random.random()*20
 		submod[i][j].I = I #* (1 + i*5)
 #		stell[i].connect(theta, th2s*(1+i*0.1/nStell))
 
@@ -53,10 +52,8 @@ for i in range(nInter):
 	connect_one_to_many(inter[i], submod[i], in2s)
 connect_many_to_many(inter, inter, in2in)
 
-# Connect thetas to stellate cells
-#for i in range(nInter):
-#	connect_one_to_many(theta, submod[i], th2s*(1+i*0.1))
-#connect_one_to_many(theta, stell, th2s)
+
+
 
 t = 0.0
 m = 0
@@ -66,21 +63,21 @@ tHist = []
 sVHist = [[] for _ in range(nStell)]
 sSHist = [[] for _ in range(nStell)]
 intVHist = [[] for _ in range(nInter)]
-thetaHist = []
+
 
 
 
 # MAIN TIMELOOP
-while(t<300):
+updateNetwork(inter)
+updateNetwork(stell)
+while(t<200):
 	t = t+dt
 	m = m+1
 	
 	# Update neural network
 	stepNetwork(inter, t, dt)
-	theta.step(t,dt,0)
 	stepNetwork(stell, t, dt)
 	updateNetwork(inter)
-	theta.update()
 	updateNetwork(stell)
 	
 	
@@ -91,16 +88,16 @@ while(t<300):
 			sSHist[i].append(stell[i].s)
 		for i in range(nInter):
 			intVHist[i].append(inter[i].V)
-		thetaHist.append(theta.s)
 
 
+# PLOT DATA
 plotStelS = True
+plt.figure()
+plt.ion()
 if plotStelS:
 	nPlot = 2*nStell+nInter+1
 else:
 	nPlot = nStell+nInter+1
-plt.figure()
-plt.ion()
 ctr = 1
 for i in range(nInter):
 	for j in range(nSPerIN):
