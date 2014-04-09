@@ -14,6 +14,7 @@ public:
 	
 	// Dynamic variables
 	double s, sp;	// current and previous spike value
+	double isFiring;	// True if the neuron is firing at the current timestep; otherwise false
 	
 	// Parameters
 	double I;		// external input

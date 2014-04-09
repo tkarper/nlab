@@ -3,28 +3,34 @@
 #include "Neuron_Stel.h"
 
 
-// Set model parameters (could be done in Python script)
-double Neuron_Stel::VL	= -65;	
-double Neuron_Stel::VNa	= 55;
-double Neuron_Stel::VK	= -90;
-double Neuron_Stel::gNa	= 52;
-double Neuron_Stel::gNap	= 0.5;
-double Neuron_Stel::gL	= 0.5;
-double Neuron_Stel::gK	= 11;
-double Neuron_Stel::CM	= 1.5;
+//// Set model parameters (could be done in Python script)
+//double Neuron_Stel::VL	= -65;	
+//double Neuron_Stel::VNa	= 55;
+//double Neuron_Stel::VK	= -90;
+//double Neuron_Stel::gNa	= 52;
+//double Neuron_Stel::gNap	= 0.5;
+//double Neuron_Stel::gL	= 0.5;
+//double Neuron_Stel::gK	= 11;
+//double Neuron_Stel::CM	= 1.5;
 
 
 
 Neuron_Stel::Neuron_Stel() :
+VL(-65),
+VNa(55),
+VK(-90),
+gNa(52),
+gNap(0.5),
+gL(0.5),
+gK(11),
+CM(1.5),
 V(VL), VP(VL), mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0),
-mDep(1), mDepP(1),
-mFac(1), mFacP(1),
 mSyn(0), mSynP(0)
 {
 	Vsyn = 0;
 	gsyn = 0.006;
-//	a_r = 1.1;
-//	a_d = 0.19;
+	a_r = 1.1;
+	a_d = 0.19;
 //	mDep0 = 1.0;
 //	mFac0 = 0.7;
 //	mDep = mDep0; mDepP = mDep0;
@@ -61,11 +67,17 @@ void Neuron_Stel::step(double t, double dt, double input)
 	// What should the transmitter pulse threshold be???
 	double spikeInd = (VP>0 ? 1.0 : 0.0);
 
-	V = VP + dt/CM*(I+input - (
-		(gNa*pow(mNaP,3)*hNaP + gNap*mNap)*(VP-VNa) + 
+	double VNew = VP + dt/CM*(I+input - (
+		(gNa*pow(mNaP,3)*hNaP + gNap*mNapP)*(VP-VNa) + 
 		gK*pow(nP,4)*(VP-VK) +
 		gL*(VP-VL) + 
 		synCurrent));
+	if (VNew > 0 && V <= VP && VP > VNew)
+		isFiring = true;
+	else
+		isFiring = false;
+	V = VNew;
+	
 	mNa = mNaP + dt*(alpha_mNa*(1-mNaP) - beta_mNa*mNaP);
 	hNa = hNaP + dt*(alpha_hNa*(1-hNaP) - beta_hNa*hNaP);
 	mNap = mNapP + dt*(alpha_mNap*(1-mNapP) - beta_mNap*mNapP);
@@ -78,10 +90,18 @@ void Neuron_Stel::step(double t, double dt, double input)
 }
 
 
-
-Neuron_Pyr::Neuron_Pyr()
+// 4.50 43 4.7 −63.85 0.05 1723.0 0.7
+Neuron_Inter::Neuron_Inter()
 {
+	gL = 4.5;
+	gNa = 43;
+	gK = 4.7;
+	gNap = 0;
+//	VT = -63.85;
+	
+	
+	
 	Vsyn = -75;
-//	a_r = 5;
-//	a_d = 0.18;
+	a_r = 5;
+	a_d = 0.18;
 }

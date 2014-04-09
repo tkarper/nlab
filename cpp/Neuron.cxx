@@ -4,7 +4,8 @@
 
 Neuron::Neuron() :
 Vsyn(0),
-gsyn(1)
+gsyn(1),
+isFiring(false)
 {
 	con 	= new nvector();
 	weight	= new dvector();

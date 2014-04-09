@@ -37,7 +37,7 @@ def stringify(x):
 
 # Discretization parameters
 dt = 0.01
-nStell = 10		# Number of stellate cells
+nStell = 6		# Number of stellate cells
 nInter = 1		# Number of interneurons
 nTheta = 0
 nHead = 1		# Number of head cells
@@ -48,10 +48,10 @@ nSMperS = 2		# Maximal number of submodules per stellate
 # Connection strengths
 sI = 1.5		# Direct current to stellate cells
 hdI = 1.5		# Direct current to HD cells
-thI = 2			# DC to theta oscillator
-inI = 1.0
+thI = 0			# DC to theta oscillator
+inI = 0.0
 th2s = 30.0		# theta oscillation input to stellates
-s2in = 10.0		# Stellate to interneuron
+s2in = 20.0		# Stellate to interneuron
 in2s = 20.0		# Interneuron to stellate
 hd2s = 0#10.0		# HD cell to stellate
 tMax = 5000
@@ -72,7 +72,7 @@ for i in range(0,nStell):
 	stell[i].I = sI * (1 + i*0.1/nStell)
 
 # Create interneurons and link to one another
-inter = np.array([Neuron_Pyr() for _ in range(0,nInter)])
+inter = np.array([Neuron_Inter() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2s)
 for i in range(nInter):
 	inter[i].I = inI
@@ -151,7 +151,7 @@ plotInd = 0
 
 
 plotLive = False
-plotEEG = False
+plotEEG = True
 
 fireHist = [[] for _ in range(nStell)]
 if plotLive:
@@ -197,7 +197,8 @@ while(t < tMax):
 	
 	# Check if stellates have fired
 	for i in range(0, nStell):
-		if stell[i].V>0 and stell[i].VP < 50 and stell[i].V > 50:
+#		if stell[i].V>0 and stell[i].VP < 50 and stell[i].V > 50:
+		if stell[i].isFiring:
 			fireHist[i].append((t,stell[i].V))
 	
 	# Move to next timestep
@@ -269,12 +270,12 @@ if plotEEG:
 	for i in range(nStell):
 		plt.subplot(nPlot,1,ctr);	ctr += 1
 		plt.plot(tHist,sVHist[i], 'r');		plt.xlim((0, tHist[-1]))
-		for j in range(len(fireHist[i])):
-			f = fireHist[i][j]
-			plt.plot(f[0], f[1], 'rs')
-			# Print instantaneous frequency
-			if j > 1:
-				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
+#		for j in range(len(fireHist[i])):
+#			f = fireHist[i][j]
+#			plt.plot(f[0], f[1], 'rs')
+#			# Print instantaneous frequency
+#			if j > 1:
+#				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
 		plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
 		if plotStelS:
 			plt.subplot(nPlot,1,ctr);	ctr += 1
@@ -288,11 +289,14 @@ if plotEEG:
 	for i in range(nTheta):
 		plt.subplot(nPlot,1,ctr);	ctr += 1
 		plt.plot(tHist, thVHist[i], 'c');		plt.xlim((0, tHist[-1]))
+plt.draw()
 
-ctr = 1
+ctr = 0
 plt.figure()
 plt.ion()
 for i in range(nStell):
 	print(len(fireHist[i]))
 	for f in fireHist[i]:
-		plt.plot(f[0], i, 'r.')
+		plt.plot(f[0], ctr, 'r.')
+	ctr += 1
+plt.ylim((-1, ctr))
