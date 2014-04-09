@@ -37,22 +37,23 @@ def stringify(x):
 
 # Discretization parameters
 dt = 0.01
-nStell = 20		# Number of stellate cells
+nStell = 10		# Number of stellate cells
 nInter = 1		# Number of interneurons
 nTheta = 0
-nHead = 3		# Number of head cells
+nHead = 1		# Number of head cells
 nHD2S = 1		# Number of head to stellate connections per stellate cell
-nSMperS = 5		# Maximal number of submodules per stellate
+nSMperS = 2		# Maximal number of submodules per stellate
 #nSPerIN = 15	# Number of stellates per submodule
 
 # Connection strengths
-sI = 1.0		# Direct current to stellate cells
+sI = 1.5		# Direct current to stellate cells
 hdI = 1.5		# Direct current to HD cells
 thI = 2			# DC to theta oscillator
+inI = 1.0
 th2s = 30.0		# theta oscillation input to stellates
-s2in = 12.0		# Stellate to interneuron
+s2in = 10.0		# Stellate to interneuron
 in2s = 20.0		# Interneuron to stellate
-hd2s = 10.0		# HD cell to stellate
+hd2s = 0#10.0		# HD cell to stellate
 tMax = 5000
 
 
@@ -66,12 +67,15 @@ print('Initializing...')
 # Create stellate cells
 stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
 for i in range(0,nStell):
-	stell[i].VP += random.random()*20
-	stell[i].I = sI
+#	stell[i].VP += random.random()*20
+#	stell[i].I = sI * (1 + float(i*i)/(nStell*nStell))
+	stell[i].I = sI * (1 + i*0.1/nStell)
 
 # Create interneurons and link to one another
-inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
+inter = np.array([Neuron_Pyr() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2s)
+for i in range(nInter):
+	inter[i].I = inI
 
 # Create submodules
 s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodules to which it belongs
@@ -112,7 +116,7 @@ for i in range(nStell):
 head = np.array([Neuron_Stel() for _ in range(0,nHead)])
 for i in range(nHead):
 	head[i].I = hdI #*(1 + i/float(nHead))
-	head[i].VP += random.random()*30
+#	head[i].VP += random.random()*30
 
 # Link HD cells to stellates
 s2hdInd = [[] for _ in range(nStell)]	# For each stellate, list of all HDs to which it is connected
@@ -120,7 +124,7 @@ for i in range(0,nStell):
 	headInd = random.sample(xrange(nHead), nHD2S)
 	connect_many_to_one(head[headInd], stell[i], hd2s)
 	s2hdInd[i] = headInd
-	stell[i].connect(stell[random.randint(0,nStell-1)], s2in)
+#	stell[i].connect(stell[random.randint(0,nStell-1)], s2in)
 #	for j in range(0,Nh2sConns):
 #		headInd = random.randrange(nHead)
 #		stell[i].connect(head[headInd], hd2s)
@@ -130,7 +134,6 @@ for i in range(0,nStell):
 theta = np.array([Neuron_Stel() for _ in range(nTheta)])
 for th in theta:
 	th.I = thI
-	th.mDepRise = 0		# Never get tired
 connect_many_to_many(theta, stell, th2s)
 connect_many_to_many(theta, head, th2s)
 
@@ -148,12 +151,13 @@ plotInd = 0
 
 
 plotLive = False
+plotEEG = False
 
 fireHist = [[] for _ in range(nStell)]
 if plotLive:
 	plt.figure()
 	plt.ion()
-else:
+elif plotEEG:
 	tHist = []
 	sVHist = [[] for _ in range(nStell)]
 	sSHist = [[] for _ in range(nStell)]
@@ -179,10 +183,16 @@ while(t < tMax):
 #		for i in range(0,nHead):
 #			head[i].sp = 0
 
+#	if t>1000 and t<2000:
+#	stell[0].I = sI * (1+int(t/1000))
+#	stell[0].I = sI * (1+int(t/1000) + float(0*0)/(nStell*nStell))
+#	elif t>=2000:
+#		stell[0].I = sI * (1 + float(0*0)/(nStell*nStell))
+
 	# Update neural network
 	stepNetwork(theta, t, dt)
 	stepNetwork(stell, t, dt)
-	stepNetwork(inter, t, dt)
+	stepNetwork(inter, t, 2*dt)
 	stepNetwork(head, t, dt)
 	
 	# Check if stellates have fired
@@ -229,7 +239,7 @@ while(t < tMax):
 	
 	# Store data for plotting
 	saveDataInterval = 0.2
-	if not plotLive and fmod(t, saveDataInterval)<dt:
+	if plotEEG and fmod(t, saveDataInterval)<dt:
 		tHist.append(t)
 		for i in range(nStell):
 			sVHist[i].append(stell[i].V)
@@ -247,7 +257,7 @@ print('Plotting data...')
 
 
 # PLOT DATA
-if not plotLive:
+if plotEEG:
 	plotStelS = False
 	plt.figure()
 	plt.ion()
@@ -262,9 +272,9 @@ if not plotLive:
 		for j in range(len(fireHist[i])):
 			f = fireHist[i][j]
 			plt.plot(f[0], f[1], 'rs')
-#			# Print instantaneous frequency
-#			if j > 1:
-#				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
+			# Print instantaneous frequency
+			if j > 1:
+				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
 		plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
 		if plotStelS:
 			plt.subplot(nPlot,1,ctr);	ctr += 1
@@ -278,3 +288,11 @@ if not plotLive:
 	for i in range(nTheta):
 		plt.subplot(nPlot,1,ctr);	ctr += 1
 		plt.plot(tHist, thVHist[i], 'c');		plt.xlim((0, tHist[-1]))
+
+ctr = 1
+plt.figure()
+plt.ion()
+for i in range(nStell):
+	print(len(fireHist[i]))
+	for f in fireHist[i]:
+		plt.plot(f[0], i, 'r.')

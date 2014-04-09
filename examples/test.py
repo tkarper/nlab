@@ -33,7 +33,7 @@ def get_neuron_item(neurArr, varname):
 
 nStell = nSPerIN*nInter
 stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
-inter = np.array([Neuron_IntN() for _ in range(0,nInter)])
+inter = np.array([Neuron_Pyr() for _ in range(0,nInter)])
 
 
 # Create submodule indices 'submod' and set initial data

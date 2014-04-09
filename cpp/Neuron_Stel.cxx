@@ -10,7 +10,7 @@ double Neuron_Stel::VK	= -90;
 double Neuron_Stel::gNa	= 52;
 double Neuron_Stel::gNap	= 0.5;
 double Neuron_Stel::gL	= 0.5;
-double Neuron_Stel::gk	= 11;
+double Neuron_Stel::gK	= 11;
 double Neuron_Stel::CM	= 1.5;
 
 
@@ -23,16 +23,16 @@ mSyn(0), mSynP(0)
 {
 	Vsyn = 0;
 	gsyn = 0.006;
-	a_r = 1.1;
-	a_d = 0.19;
-	mDep0 = 1.0;
-	mFac0 = 0.7;
-	mDep = mDep0; mDepP = mDep0;
-	mFac = mFac0; mFacP = mFac0;
-	mDepRise = 0.025;
-	mDepDecay = 1/400.0;
-	mFacRise = 0.1;
-	mFacDecay = 1/50.0;
+//	a_r = 1.1;
+//	a_d = 0.19;
+//	mDep0 = 1.0;
+//	mFac0 = 0.7;
+//	mDep = mDep0; mDepP = mDep0;
+//	mFac = mFac0; mFacP = mFac0;
+//	mDepRise = 0.025;
+//	mDepDecay = 1/400.0;
+//	mFacRise = 0.1;
+//	mFacDecay = 1/50.0;
 }
 
 
@@ -63,7 +63,7 @@ void Neuron_Stel::step(double t, double dt, double input)
 
 	V = VP + dt/CM*(I+input - (
 		(gNa*pow(mNaP,3)*hNaP + gNap*mNap)*(VP-VNa) + 
-		gk*pow(nP,4)*(VP-VK) +
+		gK*pow(nP,4)*(VP-VK) +
 		gL*(VP-VL) + 
 		synCurrent));
 	mNa = mNaP + dt*(alpha_mNa*(1-mNaP) - beta_mNa*mNaP);
@@ -71,16 +71,17 @@ void Neuron_Stel::step(double t, double dt, double input)
 	mNap = mNapP + dt*(alpha_mNap*(1-mNapP) - beta_mNap*mNapP);
 	n = nP + dt*(alpha_n*(1-nP) - beta_n*nP);
 	mSyn = mSynP + dt*(a_r*spikeInd*(1-mSynP) - a_d*mSynP);
-	mDep = mDepP + dt*(-spikeInd*mDepP*mDepRise + (mDep0-mDepP)*mDepDecay);
-	mFac = mFacP + dt*(spikeInd*(1-mFacP)*mFacRise + (mFac0-mFacP)*mFacDecay);
-	s = mSyn * mDep * mFac;
+	s = mSyn;
+//	mDep = mDepP + dt*(-spikeInd*mDepP*mDepRise + (mDep0-mDepP)*mDepDecay);
+//	mFac = mFacP + dt*(spikeInd*(1-mFacP)*mFacRise + (mFac0-mFacP)*mFacDecay);
+//	s = mSyn * mDep * mFac;
 }
 
 
 
-Neuron_IntN::Neuron_IntN()
+Neuron_Pyr::Neuron_Pyr()
 {
 	Vsyn = -75;
-	a_r = 5;
-	a_d = 0.18;
+//	a_r = 5;
+//	a_d = 0.18;
 }

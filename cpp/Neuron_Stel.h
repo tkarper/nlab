@@ -15,17 +15,17 @@ public:
 	double hNa, hNaP;
 	double n, nP;
 	double mNap, mNapP;
-	double mDep, mDepP;		// Degree of depression
-	double mFac, mFacP;		// Degree of facilitation
+//	double mDep, mDepP;		// Degree of depression
+//	double mFac, mFacP;		// Degree of facilitation
 	double mSyn, mSynP;		// Synaptic potential (non-depressed, non-facilitated)
 	
 	// Model parameters, common to all neurons of this class
 	static double VL, VNa, VK,
-		gNap, gL, gNa, gk,
+		gNap, gL, gNa, gK,
 		CM;		// Time scaling factor
-	double a_r, a_d;	// Rise/decay rate of synaptic conductance, measured in mM^(-1)ms^(-1)
-	double mDep0, mFac0;	// Resting values for depression and facilitation probabilities
-	double mDepRise, mDepDecay, mFacRise, mFacDecay;
+//	double a_r, a_d;	// Rise/decay rate of synaptic conductance, measured in mM^(-1)ms^(-1)
+//	double mDep0, mFac0;	// Resting values for depression and facilitation probabilities
+//	double mDepRise, mDepDecay, mFacRise, mFacDecay;
 	
 	Neuron_Stel();
 	void step(double t, double dt, double input_);
@@ -35,10 +35,10 @@ public:
 
 
 
-class Neuron_IntN : public Neuron_Stel
+class Neuron_Pyr : public Neuron_Stel
 {
 public:
-	Neuron_IntN();
+	Neuron_Pyr();
 };
 
 
