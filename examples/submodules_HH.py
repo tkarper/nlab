@@ -151,7 +151,7 @@ plotInd = 0
 
 
 plotLive = False
-plotEEG = True
+plotEEG = False
 
 fireHist = [[] for _ in range(nStell)]
 if plotLive:
@@ -289,7 +289,7 @@ if plotEEG:
 	for i in range(nTheta):
 		plt.subplot(nPlot,1,ctr);	ctr += 1
 		plt.plot(tHist, thVHist[i], 'c');		plt.xlim((0, tHist[-1]))
-plt.draw()
+	plt.draw()
 
 ctr = 0
 plt.figure()
