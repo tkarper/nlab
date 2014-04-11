@@ -20,7 +20,7 @@ public:
 	double mSyn, mSynP;		// Synaptic potential (non-depressed, non-facilitated)
 	
 	// Model parameters, common to all neurons of this class
-	double VL, VNa, VK,
+	double EL, ENa, EK,
 		gNap, gL, gNa, gK,
 		CM;		// Time scaling factor
 	double a_r, a_d;	// Rise/decay rate of synaptic conductance, measured in mM^(-1)ms^(-1)

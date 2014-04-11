@@ -37,7 +37,7 @@ def stringify(x):
 
 # Discretization parameters
 dt = 0.01
-nStell = 6		# Number of stellate cells
+nStell = 10		# Number of stellate cells
 nInter = 1		# Number of interneurons
 nTheta = 0
 nHead = 1		# Number of head cells
@@ -49,12 +49,12 @@ nSMperS = 2		# Maximal number of submodules per stellate
 sI = 1.5		# Direct current to stellate cells
 hdI = 1.5		# Direct current to HD cells
 thI = 0			# DC to theta oscillator
-inI = 0.0
-th2s = 30.0		# theta oscillation input to stellates
-s2in = 20.0		# Stellate to interneuron
+inI = 1.2
+th2s = 0		# theta oscillation input to stellates
+s2in = 2.0#20.0		# Stellate to interneuron
 in2s = 20.0		# Interneuron to stellate
 hd2s = 0#10.0		# HD cell to stellate
-tMax = 5000
+tMax = 2000
 
 
 
@@ -72,7 +72,7 @@ for i in range(0,nStell):
 	stell[i].I = sI * (1 + i*0.1/nStell)
 
 # Create interneurons and link to one another
-inter = np.array([Neuron_Inter() for _ in range(0,nInter)])
+inter = np.array([Neuron_Stel() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2s)
 for i in range(nInter):
 	inter[i].I = inI
@@ -152,8 +152,12 @@ plotInd = 0
 
 plotLive = False
 plotEEG = False
+plotFiring = False
+plotStelS = False
+plotFreq = True
 
-fireHist = [[] for _ in range(nStell)]
+fireHist = [[] for _ in range(nStell+nInter)]
+tFireHist = [[] for _ in range(nStell+nInter)]
 if plotLive:
 	plt.figure()
 	plt.ion()
@@ -192,14 +196,18 @@ while(t < tMax):
 	# Update neural network
 	stepNetwork(theta, t, dt)
 	stepNetwork(stell, t, dt)
-	stepNetwork(inter, t, 2*dt)
+	stepNetwork(inter, t, 3*dt)
 	stepNetwork(head, t, dt)
 	
 	# Check if stellates have fired
-	for i in range(0, nStell):
+	for i in range(nStell):
 #		if stell[i].V>0 and stell[i].VP < 50 and stell[i].V > 50:
 		if stell[i].isFiring:
-			fireHist[i].append((t,stell[i].V))
+			fireHist[i].append(stell[i].V)	
+			tFireHist[i].append(t)
+	for i in range(nInter):
+		if inter[i].isFiring:
+			tFireHist[i+nStell].append(t)
 	
 	# Move to next timestep
 	updateNetwork(theta)
@@ -257,46 +265,71 @@ print('Simulation finished')
 print('Plotting data...')
 
 
-# PLOT DATA
-if plotEEG:
-	plotStelS = False
+
+# Compute frequencies
+freq = [[] for _ in range(len(tFireHist))]
+for i in range(len(tFireHist)):
+	nFire = max(len(tFireHist[i])-1, 0)
+	freq[i] = np.zeros(nFire)
+	for j in range(nFire):
+		freq[i][j] = 1000/(tFireHist[i][j+1] - tFireHist[i][j])
+
+
+if plotEEG or plotFreq:
+	nPlot = 0
+	if plotEEG:
+		nPlot += nStell+nInter+nHead+nTheta
+	if plotStelS:
+		nPlot += nStell
+	if plotFreq:
+		nPlot += nStell+nInter
 	plt.figure()
 	plt.ion()
-	if plotStelS:
-		nPlot = 2*nStell+nInter+nHead+nTheta
-	else:
-		nPlot = nStell+nInter+nHead+nTheta
 	ctr = 1
 	for i in range(nStell):
-		plt.subplot(nPlot,1,ctr);	ctr += 1
-		plt.plot(tHist,sVHist[i], 'r');		plt.xlim((0, tHist[-1]))
-#		for j in range(len(fireHist[i])):
-#			f = fireHist[i][j]
-#			plt.plot(f[0], f[1], 'rs')
-#			# Print instantaneous frequency
-#			if j > 1:
-#				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
-		plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
-		if plotStelS:
+		if plotEEG:
 			plt.subplot(nPlot,1,ctr);	ctr += 1
-			plt.plot(tHist,sSHist[i], 'g');			plt.xlim((0, tHist[-1]))
+			plt.plot(tHist,sVHist[i], 'r');		plt.xlim((0, tMax))
+	#		for j in range(len(fireHist[i])):
+	#			f = fireHist[i][j]
+	#			plt.plot(f[0], f[1], 'rs')
+	#			# Print instantaneous frequency
+	#			if j > 1:
+	#				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
+			plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
+			if plotStelS:
+				plt.subplot(nPlot,1,ctr);	ctr += 1
+				plt.plot(tHist,sSHist[i], 'g');			plt.xlim((0, tMax))
+		if plotFreq:
+			plt.subplot(nPlot,1,ctr);		ctr += 1
+			plt.plot(tFireHist[i][1:], freq[i], 'ro-')
+			plt.xlim((0, t))
+			plt.ylabel('Freq')
 	for i in range(nInter):
-		plt.subplot(nPlot,1,ctr);	ctr += 1
-		plt.plot(tHist,intVHist[i],'b');	plt.xlim((0, tHist[-1]))
-	for i in range(nHead):
-		plt.subplot(nPlot,1,ctr);	ctr += 1
-		plt.plot(tHist,hdVHist[i],'g');		plt.xlim((0, tHist[-1]))
-	for i in range(nTheta):
-		plt.subplot(nPlot,1,ctr);	ctr += 1
-		plt.plot(tHist, thVHist[i], 'c');		plt.xlim((0, tHist[-1]))
+		if plotEEG:
+			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.plot(tHist,intVHist[i],'b');	plt.xlim((0, tMax))
+		if plotFreq:
+			plt.subplot(nPlot,1,ctr);		ctr += 1
+			plt.plot(tFireHist[i+nStell][1:], freq[i+nStell], 'bo-')
+			plt.xlim((0, t))
+			plt.ylabel('Freq')
+	if plotEEG:
+		for i in range(nHead):
+			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.plot(tHist,hdVHist[i],'g');		plt.xlim((0, tMax))
+		for i in range(nTheta):
+			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.plot(tHist, thVHist[i], 'c');		plt.xlim((0, tMax))
+	
 	plt.draw()
 
-ctr = 0
-plt.figure()
-plt.ion()
-for i in range(nStell):
-	print(len(fireHist[i]))
-	for f in fireHist[i]:
-		plt.plot(f[0], ctr, 'r.')
-	ctr += 1
-plt.ylim((-1, ctr))
+
+if plotFiring:
+	ctr = 0
+	plt.figure()
+	plt.ion()
+	for i in range(nStell):
+		plot(tFireHist[i], ctr*np.ones(tFireHist[i].size), 'r.')
+		ctr += 1
+	plt.ylim((-1, ctr))

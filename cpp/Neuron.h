@@ -18,7 +18,7 @@ public:
 	
 	// Parameters
 	double I;		// external input
-	double Vsyn;	// Synaptic reversal potential. Only meaningful for HH-type models
+	double Esyn;	// Synaptic reversal potential. Only meaningful for HH-type models
 	double gsyn;	// Conductance for synapse, measured in mS (milli-Siemens)
 	
 	Neuron();

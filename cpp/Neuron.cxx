@@ -3,7 +3,7 @@
 #include <iostream>
 
 Neuron::Neuron() :
-Vsyn(0),
+Esyn(0),
 gsyn(1),
 isFiring(false)
 {

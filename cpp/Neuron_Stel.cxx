@@ -4,9 +4,9 @@
 
 
 //// Set model parameters (could be done in Python script)
-//double Neuron_Stel::VL	= -65;	
-//double Neuron_Stel::VNa	= 55;
-//double Neuron_Stel::VK	= -90;
+//double Neuron_Stel::EL	= -65;	
+//double Neuron_Stel::ENa	= 55;
+//double Neuron_Stel::EK	= -90;
 //double Neuron_Stel::gNa	= 52;
 //double Neuron_Stel::gNap	= 0.5;
 //double Neuron_Stel::gL	= 0.5;
@@ -16,18 +16,18 @@
 
 
 Neuron_Stel::Neuron_Stel() :
-VL(-65),
-VNa(55),
-VK(-90),
+EL(-65),
+ENa(55),
+EK(-90),
 gNa(52),
 gNap(0.5),
 gL(0.5),
 gK(11),
 CM(1.5),
-V(VL), VP(VL), mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0),
+V(-65), VP(-65), mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0),
 mSyn(0), mSynP(0)
 {
-	Vsyn = 0;
+	Esyn = 0;
 	gsyn = 0.006;
 	a_r = 1.1;
 	a_d = 0.19;
@@ -49,7 +49,7 @@ void Neuron_Stel::step(double t, double dt, double input)
 	for(size_t i=0; i<con->size(); i++)
 	{
 		Neuron* nr = con->at(i);
-		synCurrent += weight->at(i) * nr->sp * nr->gsyn * (VP - nr->Vsyn);
+		synCurrent += weight->at(i) * nr->sp * nr->gsyn * (VP - nr->Esyn);
 	}
 	
 	// Functions appearing in the model
@@ -68,9 +68,9 @@ void Neuron_Stel::step(double t, double dt, double input)
 	double spikeInd = (VP>0 ? 1.0 : 0.0);
 
 	double VNew = VP + dt/CM*(I+input - (
-		(gNa*pow(mNaP,3)*hNaP + gNap*mNapP)*(VP-VNa) + 
-		gK*pow(nP,4)*(VP-VK) +
-		gL*(VP-VL) + 
+		(gNa*pow(mNaP,3)*hNaP + gNap*mNapP)*(VP-ENa) + 
+		gK*pow(nP,4)*(VP-EK) +
+		gL*(VP-EL) + 
 		synCurrent));
 	if (VNew > 0 && V <= VP && VP > VNew)
 		isFiring = true;
@@ -101,7 +101,7 @@ Neuron_Inter::Neuron_Inter()
 	
 	
 	
-	Vsyn = -75;
+	Esyn = -75;
 	a_r = 5;
 	a_d = 0.18;
 }
