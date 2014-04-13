@@ -37,8 +37,8 @@ def stringify(x):
 
 # Discretization parameters
 dt = 0.01
-nStell = 10		# Number of stellate cells
-nInter = 1		# Number of interneurons
+nStell = 32		# Number of stellate cells
+nInter = 4		# Number of interneurons
 nTheta = 0
 nHead = 1		# Number of head cells
 nHD2S = 1		# Number of head to stellate connections per stellate cell
@@ -47,11 +47,11 @@ nSMperS = 2		# Maximal number of submodules per stellate
 
 # Connection strengths
 sI = 1.5		# Direct current to stellate cells
-hdI = 1.5		# Direct current to HD cells
+hdI = 0#1.5		# Direct current to HD cells
 thI = 0			# DC to theta oscillator
-inI = 1.2
+inI = 1.0
 th2s = 0		# theta oscillation input to stellates
-s2in = 2.0#20.0		# Stellate to interneuron
+s2in = 5.0		# Stellate to interneuron
 in2s = 20.0		# Interneuron to stellate
 hd2s = 0#10.0		# HD cell to stellate
 tMax = 2000
@@ -69,10 +69,11 @@ stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
 for i in range(0,nStell):
 #	stell[i].VP += random.random()*20
 #	stell[i].I = sI * (1 + float(i*i)/(nStell*nStell))
-	stell[i].I = sI * (1 + i*0.1/nStell)
+	stell[i].I = sI * (1 + i*1.0/nStell)
+#	stell[i].I = sI
 
 # Create interneurons and link to one another
-inter = np.array([Neuron_Stel() for _ in range(0,nInter)])
+inter = np.array([Neuron_Inter() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2s)
 for i in range(nInter):
 	inter[i].I = inI
@@ -100,16 +101,27 @@ s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodule
 #	for ind in submodInd[i]:
 #		s2smInd[ind].append(i)
 
-distr = np.random.normal(0.0, 0.5/nInter, (nStell, nSMperS))
-for i in range(nStell):
-	# Convert normally distributed numbers to indices in [0, nInter)
-	ind = np.round(nInter*(i/float(nStell) + distr[i,...])).astype(int)
-	# Compute indices modulo nInter and remove duplicates
-	ind = np.unique(np.mod(np.mod(nInter+ind,nInter), nInter))
-	# Link interneurons to stellate cells
-	connect_many_to_one(inter[ind], stell[i], in2s)
-	connect_one_to_many(stell[i], inter[ind], s2in)
-	s2smInd[i] = ind
+## Normally distributed random connections from stellates to interneurons
+#distr = np.random.normal(0.0, 0.5/nInter, (nStell, nSMperS))
+#for i in range(nStell):
+#	# Convert normally distributed numbers to indices in [0, nInter)
+#	ind = np.round(nInter*(i/float(nStell) + distr[i,...])).astype(int)
+#	# Compute indices modulo nInter and remove duplicates
+#	ind = np.unique(np.mod(np.mod(nInter+ind,nInter), nInter))
+#	# Link interneurons to stellate cells
+#	connect_many_to_one(inter[ind], stell[i], in2s)
+#	connect_one_to_many(stell[i], inter[ind], s2in)
+#	s2smInd[i] = ind
+
+# Distance-determined connections from stellates to interneurons
+connRad = (3*nStell)/(4*nInter)
+for i in range(nInter):
+	k = int(nStell*(i/float(nInter)))
+	ind = range(k-connRad, k+connRad)
+	for j in ind:
+		s2smInd[j].append(i)
+	connect_many_to_one(stell[ind], inter[i], s2in)
+	connect_one_to_many(inter[i], stell[ind], in2s)
 
 # Create head cells
 #head = np.array([Neuron() for _ in range(0,nHead)])
@@ -137,6 +149,11 @@ for th in theta:
 connect_many_to_many(theta, stell, th2s)
 connect_many_to_many(theta, head, th2s)
 
+
+# Print submodule indices
+print('Stellate -> submodule mapping:')
+for i in range(nStell):
+	print(s2smInd[i])
 
 
 print('Initialization finished.')
@@ -196,7 +213,7 @@ while(t < tMax):
 	# Update neural network
 	stepNetwork(theta, t, dt)
 	stepNetwork(stell, t, dt)
-	stepNetwork(inter, t, 3*dt)
+	stepNetwork(inter, t, 2*dt)
 	stepNetwork(head, t, dt)
 	
 	# Check if stellates have fired
@@ -283,12 +300,16 @@ if plotEEG or plotFreq:
 		nPlot += nStell
 	if plotFreq:
 		nPlot += nStell+nInter
+	
+	nPlotX = 2
+	nPlotY = ceil(float(nPlot)/nPlotX)
+	
 	plt.figure()
 	plt.ion()
 	ctr = 1
 	for i in range(nStell):
 		if plotEEG:
-			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
 			plt.plot(tHist,sVHist[i], 'r');		plt.xlim((0, tMax))
 	#		for j in range(len(fireHist[i])):
 	#			f = fireHist[i][j]
@@ -298,28 +319,33 @@ if plotEEG or plotFreq:
 	#				plt.annotate("%d"%(1000.0/(f[0]-fireHist[i][j-1][0])), f, ha='left')
 			plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
 			if plotStelS:
-				plt.subplot(nPlot,1,ctr);	ctr += 1
+				plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
 				plt.plot(tHist,sSHist[i], 'g');			plt.xlim((0, tMax))
 		if plotFreq:
-			plt.subplot(nPlot,1,ctr);		ctr += 1
-			plt.plot(tFireHist[i][1:], freq[i], 'ro-')
-			plt.xlim((0, t))
-			plt.ylabel('Freq')
+			plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
+			if len(freq[i])>0: 
+				plt.plot(tFireHist[i][1:], freq[i], 'ro-')
+				plt.xlim((0, t))
+				plt.ylim((min(freq[i])-1, max(freq[i])+1))
+			plt.ylabel('hz, S%d'%i)
 	for i in range(nInter):
 		if plotEEG:
-			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
 			plt.plot(tHist,intVHist[i],'b');	plt.xlim((0, tMax))
+			plt.ylabel('hz, IN%d'%i)
 		if plotFreq:
-			plt.subplot(nPlot,1,ctr);		ctr += 1
-			plt.plot(tFireHist[i+nStell][1:], freq[i+nStell], 'bo-')
-			plt.xlim((0, t))
+			plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
+			if len(freq[i+nStell])>0: 
+				plt.plot(tFireHist[i+nStell][1:], freq[i+nStell], 'bo-')
+				plt.xlim((0, t))
+				plt.ylim((min(freq[i+nStell])-1, max(freq[i+nStell])+1))
 			plt.ylabel('Freq')
 	if plotEEG:
 		for i in range(nHead):
-			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
 			plt.plot(tHist,hdVHist[i],'g');		plt.xlim((0, tMax))
 		for i in range(nTheta):
-			plt.subplot(nPlot,1,ctr);	ctr += 1
+			plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
 			plt.plot(tHist, thVHist[i], 'c');		plt.xlim((0, tMax))
 	
 	plt.draw()

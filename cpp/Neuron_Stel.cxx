@@ -30,6 +30,7 @@ mSyn(0), mSynP(0)
 	Esyn = 0;
 	gsyn = 0.006;
 	a_r = 1.1;
+//	a_r = 0.78;
 	a_d = 0.19;
 //	mDep0 = 1.0;
 //	mFac0 = 0.7;
@@ -63,20 +64,22 @@ void Neuron_Stel::step(double t, double dt, double input)
 	double beta_n = 0.125*exp(-(VP+37)/80);
 	double beta_mNap = exp(-(VP+38)/6.5)/(0.15*(1+exp(-(VP+38)/6.5)));
 	
-	// Spike indicator: equal to 1 if neuron is spiking, otherwise 0
-	// What should the transmitter pulse threshold be???
-	double spikeInd = (VP>0 ? 1.0 : 0.0);
 
 	double VNew = VP + dt/CM*(I+input - (
 		(gNa*pow(mNaP,3)*hNaP + gNap*mNapP)*(VP-ENa) + 
 		gK*pow(nP,4)*(VP-EK) +
 		gL*(VP-EL) + 
 		synCurrent));
-	if (VNew > 0 && V <= VP && VP > VNew)
+	if (VNew > 0 && V < VP && VP > VNew)
 		isFiring = true;
 	else
 		isFiring = false;
 	V = VNew;
+	
+	// Spike indicator: equal to 1 if neuron is spiking, otherwise 0
+	// What should the transmitter pulse threshold be???
+	double spikeInd = (VP>0 ? 1.0 : 0.0);
+//	double spikeInd = isFiring/dt;
 	
 	mNa = mNaP + dt*(alpha_mNa*(1-mNaP) - beta_mNa*mNaP);
 	hNa = hNaP + dt*(alpha_hNa*(1-hNaP) - beta_hNa*hNaP);
@@ -93,15 +96,16 @@ void Neuron_Stel::step(double t, double dt, double input)
 // 4.50 43 4.7 −63.85 0.05 1723.0 0.7
 Neuron_Inter::Neuron_Inter()
 {
-	gL = 4.5;
-	gNa = 43;
-	gK = 4.7;
-	gNap = 0;
+//	gL = 4.5;
+//	gNa = 43;
+//	gK = 4.7;
+//	gNap = 0;
 //	VT = -63.85;
 	
 	
 	
 	Esyn = -75;
 	a_r = 5;
+//	a_r = 0.95;
 	a_d = 0.18;
 }

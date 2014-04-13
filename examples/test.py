@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 dt = 0.01
 
 # Connection strengths
-I = 5.0			# External exitatory input
-tMax = 1000
+I = 10			# External exitatory input
+tMax = 500
 
 
 
@@ -26,18 +26,13 @@ def get_neuron_item(neurArr, varname):
 
 
 
-neur = np.array([Neuron_Stel(), Neuron_Inter()])
+neur = np.array([Neuron_Traub(), Neuron_Traub()])
 nNeur = neur.size
 
-
-
-neur[1].EK = -90
-neur[1].ENa = 70
-neur[1].gL = 0.5
-neur[1].gK = 11
-neur[1].gNa = 52
-neur[1].gNap = 0.5
-
+neur[0].gM = 1
+neur[1].Esyn = -80
+neur[1].alpha_s = 2
+neur[1].beta_s = 0.1
 
 t = 0.0
 m = 0
@@ -58,7 +53,8 @@ while(t<tMax):
 	t = t+dt
 	m = m+1
 	
-	newI = I*t/tMax
+#	newI = I*t/tMax
+	newI = I
 	neur[0].I = newI
 	neur[1].I = newI
 	
@@ -89,6 +85,8 @@ for i in range(nNeur):
 		freq[i][j] = 1000/(tFireHist[i][j+1] - tFireHist[i][j])
 
 
+
+
 # PLOT DATA
 plotStelS = True
 plt.figure()
@@ -110,4 +108,3 @@ for i in range(nNeur):
 	plt.plot(tFireHist[i][1:], freq[i], 'bo-')
 	plt.xlim((0, tHist[-1]))
 	plt.ylabel('Freq')
-
