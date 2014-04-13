@@ -20,9 +20,25 @@ gM(0),		// No M-current
 gNa(100),
 CM(1),
 alpha_s(10),	// Excitatory
-beta_s(5)		// Excitatory
+beta_s(5),		// Excitatory
+VT(-67),	// (Ermentrout ea 2001: VT=-67)
+VS(0)
 {
 	Esyn = 0;	// Excitatory
+}
+
+
+Neuron_Traub_IN::Neuron_Traub_IN()
+{
+	Esyn = -80;
+	alpha_s = 2;
+	beta_s = 0.1;
+}
+
+
+double linSmooth(double x, double theta) {
+	const double tol = 1e-8;
+	return std::abs(x)<tol ? -theta : x / (1 - exp(-x/theta));
 }
 
 
@@ -37,15 +53,30 @@ void Neuron_Traub::step(double t, double dt, double input)
 	}
 	
 	// Functions appearing in the model
-	//const double tol = 1e-10;
-	double alpha_m = 0.32*(54+Vp) / (1-exp(-(Vp+54)/4)),
-		alpha_h = 0.128*exp(-(50+Vp)/18),
-		alpha_n = 0.032*(Vp+52) / (1-exp(-(Vp+52)/5)),
-		beta_m = 0.28*(Vp+27) / (exp((Vp+27)/5) - 1),
-		beta_h = 4 / (1+exp(-(Vp+27)/5)),
-		beta_n = 0.5*exp(-(57+Vp)/40),
-		wInf = 1 / (1+exp(-(Vp+35)/10)),
-		tauW = 100 / (3.3*exp((Vp+35)/20) + exp(-(Vp+35)/20));
+//	double alpha_m = 0.32*(Vp-VT-13) / (1-exp(-(Vp-VT-13)/4)),
+//		alpha_h = 0.128*exp(-(Vp-VT-VS-17)/18),
+//		alpha_n = 0.032*(Vp-VT-15) / (1-exp(-(Vp-VT-15)/5)),
+//		beta_m = -0.28*(Vp-VT-40) / (1-exp((Vp-VT-40)/5)),
+//		beta_h = 4 / (1+exp(-(Vp-VT-VS-40)/5)),
+//		beta_n = 0.5*exp(-(Vp-VT-10)/40);
+	double alpha_m = 0.32*linSmooth(Vp-VT-13, 4),
+		alpha_h = 0.128*exp(-(Vp-VT-VS-17)/18),
+		alpha_n = 0.032*linSmooth(Vp-VT-15, 5),
+		beta_m = -0.28*linSmooth(Vp-VT-40, -5),
+		beta_h = 4 / (1+exp(-(Vp-VT-VS-40)/5)),
+		beta_n = 0.5*exp(-(Vp-VT-10)/40);
+	
+	// Ermentrout ea 2001
+//	double 	wInf = 1 / (1+exp(-(Vp+35)/10)),
+//		tauW = 100 / (3.3*exp((Vp+35)/20) + exp(-(Vp+35)/20));
+//	w = wp + dt*(wInf - wp)/tauW;
+	
+	// Destexhe and Paré 1999
+//	double alpha_w = 0.0001*(Vp+30) / (1-exp(-(Vp+30)/9)),
+//		beta_w = -0.0001*(Vp+30) / (1-exp((Vp+30)/9));
+	double alpha_w = 0.0001*linSmooth(Vp+30, 9),
+		beta_w = -0.0001*linSmooth(Vp+30, -9);
+	w = wp + dt*(alpha_w*(1-wp) - beta_w*wp);
 
 	double VNew = Vp + dt/CM*(I+input 
 		- (Vp-ENa) * gNa*hp*pow(mp,3)
@@ -61,6 +92,5 @@ void Neuron_Traub::step(double t, double dt, double input)
 	m = mp + dt*(alpha_m*(1-mp) - beta_m*mp);
 	h = hp + dt*(alpha_h*(1-hp) - beta_h*hp);
 	n = np + dt*(alpha_n*(1-np) - beta_n*np);
-	w = wp + dt*(wInf - wp)/tauW;
 	s = sp + dt*(alpha_s*(1-sp)/(1+exp(-(Vp+10)/10)) - beta_s*sp);
 }

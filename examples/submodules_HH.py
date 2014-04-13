@@ -37,8 +37,8 @@ def stringify(x):
 
 # Discretization parameters
 dt = 0.01
-nStell = 32		# Number of stellate cells
-nInter = 4		# Number of interneurons
+nStell = 4		# Number of stellate cells
+nInter = 1		# Number of interneurons
 nTheta = 0
 nHead = 1		# Number of head cells
 nHD2S = 1		# Number of head to stellate connections per stellate cell
@@ -46,15 +46,15 @@ nSMperS = 2		# Maximal number of submodules per stellate
 #nSPerIN = 15	# Number of stellates per submodule
 
 # Connection strengths
-sI = 1.5		# Direct current to stellate cells
+sI = 0.5		# Direct current to stellate cells
 hdI = 0#1.5		# Direct current to HD cells
 thI = 0			# DC to theta oscillator
-inI = 1.0
+inI = 0
 th2s = 0		# theta oscillation input to stellates
-s2in = 5.0		# Stellate to interneuron
-in2s = 20.0		# Interneuron to stellate
+s2in = 0.01		# Stellate to interneuron
+in2s = 0.01#20.0		# Interneuron to stellate
 hd2s = 0#10.0		# HD cell to stellate
-tMax = 2000
+tMax = 1000
 
 
 
@@ -65,15 +65,18 @@ print('Initializing...')
 
 
 # Create stellate cells
-stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
+stell = np.array([Neuron_Traub() for _ in range(0,nStell)])
+#stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
 for i in range(0,nStell):
 #	stell[i].VP += random.random()*20
 #	stell[i].I = sI * (1 + float(i*i)/(nStell*nStell))
-	stell[i].I = sI * (1 + i*1.0/nStell)
+	stell[i].I = sI * (1 + i*0.1/nStell)
 #	stell[i].I = sI
+	stell[i].gM = 2
 
 # Create interneurons and link to one another
-inter = np.array([Neuron_Inter() for _ in range(0,nInter)])
+inter = np.array([Neuron_Traub_IN() for _ in range(0,nInter)])
+#inter = np.array([Neuron_Inter() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2s)
 for i in range(nInter):
 	inter[i].I = inI
@@ -101,27 +104,27 @@ s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodule
 #	for ind in submodInd[i]:
 #		s2smInd[ind].append(i)
 
-## Normally distributed random connections from stellates to interneurons
-#distr = np.random.normal(0.0, 0.5/nInter, (nStell, nSMperS))
-#for i in range(nStell):
-#	# Convert normally distributed numbers to indices in [0, nInter)
-#	ind = np.round(nInter*(i/float(nStell) + distr[i,...])).astype(int)
-#	# Compute indices modulo nInter and remove duplicates
-#	ind = np.unique(np.mod(np.mod(nInter+ind,nInter), nInter))
-#	# Link interneurons to stellate cells
-#	connect_many_to_one(inter[ind], stell[i], in2s)
-#	connect_one_to_many(stell[i], inter[ind], s2in)
-#	s2smInd[i] = ind
+# Normally distributed random connections from stellates to interneurons
+distr = np.random.normal(0.0, 0.5/nInter, (nStell, nSMperS))
+for i in range(nStell):
+	# Convert normally distributed numbers to indices in [0, nInter)
+	ind = np.round(nInter*(i/float(nStell) + distr[i,...])).astype(int)
+	# Compute indices modulo nInter and remove duplicates
+	ind = np.unique(np.mod(np.mod(nInter+ind,nInter), nInter))
+	# Link interneurons to stellate cells
+	connect_many_to_one(inter[ind], stell[i], in2s)
+	connect_one_to_many(stell[i], inter[ind], s2in)
+	s2smInd[i] = ind
 
-# Distance-determined connections from stellates to interneurons
-connRad = (3*nStell)/(4*nInter)
-for i in range(nInter):
-	k = int(nStell*(i/float(nInter)))
-	ind = range(k-connRad, k+connRad)
-	for j in ind:
-		s2smInd[j].append(i)
-	connect_many_to_one(stell[ind], inter[i], s2in)
-	connect_one_to_many(inter[i], stell[ind], in2s)
+## Distance-determined connections from stellates to interneurons
+#connRad = (3*nStell)/(4*nInter)
+#for i in range(nInter):
+#	k = int(nStell*(i/float(nInter)))
+#	ind = range(k-connRad, k+connRad)
+#	for j in ind:
+#		s2smInd[j].append(i)
+#	connect_many_to_one(stell[ind], inter[i], s2in)
+#	connect_one_to_many(inter[i], stell[ind], in2s)
 
 # Create head cells
 #head = np.array([Neuron() for _ in range(0,nHead)])
@@ -168,7 +171,7 @@ plotInd = 0
 
 
 plotLive = False
-plotEEG = False
+plotEEG = True
 plotFiring = False
 plotStelS = False
 plotFreq = True

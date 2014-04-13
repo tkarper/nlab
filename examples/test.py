@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 dt = 0.01
 
 # Connection strengths
-I = 10			# External exitatory input
-tMax = 500
+I = 0.5			# External exitatory input
+tMax = 1000
 
 
 
@@ -29,10 +29,14 @@ def get_neuron_item(neurArr, varname):
 neur = np.array([Neuron_Traub(), Neuron_Traub()])
 nNeur = neur.size
 
-neur[0].gM = 1
-neur[1].Esyn = -80
-neur[1].alpha_s = 2
-neur[1].beta_s = 0.1
+
+
+#neur[1].VS=10
+#neur[1].VT = -70
+neur[0].gM = 2
+#neur[1].Esyn = -80
+#neur[1].alpha_s = 2
+#neur[1].beta_s = 0.1
 
 t = 0.0
 m = 0
@@ -52,7 +56,9 @@ sSHist = [[] for _ in range(nNeur)]
 while(t<tMax):
 	t = t+dt
 	m = m+1
-	
+
+	tStart = 0
+#	newI = I * max(t-tStart,0)/(tMax-tStart)
 #	newI = I*t/tMax
 	newI = I
 	neur[0].I = newI
@@ -95,16 +101,18 @@ if plotStelS:
 	nPlot = 3*nNeur
 else:
 	nPlot = 2*nNeur
+nPlotX = 1
+nPlotY = ceil(float(nPlot)/nPlotX)
 ctr = 1
 for i in range(nNeur):
-	plt.subplot(nPlot,1,ctr);	ctr += 1
+	plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
 	plt.plot(tHist,sVHist[i], 'r')
 	plt.xlim((0, tHist[-1]))
 	if plotStelS:
-		plt.subplot(nPlot,1,ctr);		ctr += 1
+		plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
 		plt.plot(tHist,sSHist[i], 'g')
 		plt.xlim((0, tHist[-1]))
-	plt.subplot(nPlot,1,ctr);		ctr += 1
+	plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
 	plt.plot(tFireHist[i][1:], freq[i], 'bo-')
 	plt.xlim((0, tHist[-1]))
 	plt.ylabel('Freq')

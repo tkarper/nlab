@@ -3,9 +3,9 @@
 #include <iostream>
 
 Neuron::Neuron() :
+isFiring(false),
 Esyn(0),
-gsyn(1),
-isFiring(false)
+gsyn(1)
 {
 	con 	= new nvector();
 	weight	= new dvector();

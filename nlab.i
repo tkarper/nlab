@@ -154,7 +154,7 @@ void connect_one_to_many(PyObject* from_, PyObject* to_, double val)
 		THIS WORKS!!!! :) Please leave as this was the breaking-point
 	
 */
-	
+/*	
 void mongo(PyObject* inn)
 {
 	PyArrayObject* arr = (PyArrayObject*) PyArray_FROM_O(inn);
@@ -167,6 +167,6 @@ void mongo(PyObject* inn)
 		Neuron* nr = (Neuron*) vptr;
 	}
 }
-
+*/
 
 }

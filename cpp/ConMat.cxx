@@ -50,7 +50,7 @@ ConMat2::ConMat2(size_t n)
 ConMat2::ConMat2(size_t n, size_t m)
 {
 	W.resize(n);
-	for(int i=0; i<n; i++)
+	for(size_t i=0; i<n; i++)
 	{
 		W[i].reserve(m);
 	}	

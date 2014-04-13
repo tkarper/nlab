@@ -16,16 +16,17 @@
 
 
 Neuron_Stel::Neuron_Stel() :
+V(-65), VP(-65), 
+mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0),
+mSyn(0), mSynP(0),
 EL(-65),
 ENa(55),
 EK(-90),
-gNa(52),
 gNap(0.5),
 gL(0.5),
+gNa(52),
 gK(11),
-CM(1.5),
-V(-65), VP(-65), mNa(0), mNaP(0), hNa(0), hNaP(0), n(0), nP(0), mNap(0), mNapP(0),
-mSyn(0), mSynP(0)
+CM(1.5)
 {
 	Esyn = 0;
 	gsyn = 0.006;
