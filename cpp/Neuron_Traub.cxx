@@ -11,7 +11,7 @@ m(0), mp(0),
 n(0), np(0),
 h(0), hp(0),
 w(0), wp(0),
-EK(-100),
+EK(-85),	// From Destexe ea 1999; EK=-100 in Ermentrout ea 2001
 ENa(50),
 EL(-67),
 gL(0.2),
@@ -38,7 +38,7 @@ Neuron_Traub_IN::Neuron_Traub_IN()
 
 double linSmooth(double x, double theta) {
 	const double tol = 1e-8;
-	return std::abs(x)<tol ? -theta : x / (1 - exp(-x/theta));
+	return std::abs(x)<tol ? theta : x / (1 - exp(-x/theta));
 }
 
 
@@ -82,7 +82,7 @@ void Neuron_Traub::step(double t, double dt, double input)
 		- (Vp-ENa) * gNa*hp*pow(mp,3)
 		- (Vp-EK) * (gK*pow(np,4) + gM*wp)
 		- (Vp-EL) * gL
-		- (Vp-Esyn) * gsyn*synPot);
+		- synPot);
 	if (VNew > 0 && V <= Vp && Vp > VNew)
 		isFiring = true;
 	else
@@ -92,5 +92,5 @@ void Neuron_Traub::step(double t, double dt, double input)
 	m = mp + dt*(alpha_m*(1-mp) - beta_m*mp);
 	h = hp + dt*(alpha_h*(1-hp) - beta_h*hp);
 	n = np + dt*(alpha_n*(1-np) - beta_n*np);
-	s = sp + dt*(alpha_s*(1-sp)/(1+exp(-(Vp+10)/10)) - beta_s*sp);
+	s = sp + dt*(alpha_s*(1-sp)/(1+exp(-(Vp+10))) - beta_s*sp);		// In Ermentrout ea 2001: (...)exp(-(Vp+10)/10))
 }
