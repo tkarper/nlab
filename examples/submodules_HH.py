@@ -39,7 +39,7 @@ def stringify(x):
 # Discretization parameters
 dt = 0.02
 nStell = 32		# Number of stellate cells
-nInter = 4		# Number of interneurons
+nInter = 1		# Number of interneurons
 nTheta = 0
 nHead = 0		# Number of head cells
 nHD2S = 3		# Number of head to stellate connections per stellate cell
@@ -47,19 +47,20 @@ nSMperS = 2		# Maximal number of submodules per stellate
 #nSPerIN = 15	# Number of stellates per submodule
 
 # Connection strengths
-sI = 1.5		# Direct current to stellate cells
+sI = 2.0		# Direct current to stellate cells
 inI = 0.4
 hdI = 0			# Direct current to HD cells
 thI = 0			# DC to theta oscillator
 th2s = 0		# theta oscillation input to stellates
 s2in = 2.0		# Stellate to interneuron
-in2s = 1.0		# Interneuron to stellate
+in2s = 2.0		# Interneuron to stellate
 in2in= in2s
 hd2s = 0.2		# HD cell to stellate
 tMax = 10000
 
 # Seed random number generator
-randSeed = 4145#int(time.time()) % 10000
+randSeed = 273#int(time.time()) % 10000
+#randSeed = 4145
 print('Random seed: %d'%randSeed)
 random.seed(randSeed)
 
@@ -78,7 +79,8 @@ for i in range(0,nStell):
 #	stell[i].VP += random.random()*20
 #	stell[i].I = sI * (1 + float(i*i)/(nStell*nStell))
 #	stell[i].I = sI * (1 + i*0.1/nStell)
-	stell[i].I = sI * (1 + 0.2*random.random())
+#	stell[i].I = sI * (1 + 0.2*random.random())
+	stell[i].I = sI * random.random()
 #	stell[i].I = sI
 	stell[i].gM = 1
 
@@ -133,7 +135,8 @@ s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodule
 #	connect_many_to_one(inter[ind], stell[i], in2s)
 
 # Distance-determined connections from stellates to interneurons
-connRad = nStell/nInter
+connRad = nStell/(2*nInter)
+#connRad = nStell/nInter
 #connRad = (3*nStell)/(2*nInter)
 for i in range(nInter):
 	k = int(nStell*(i/float(nInter)))
