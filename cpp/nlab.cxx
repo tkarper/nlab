@@ -11,10 +11,9 @@
 
 void stepNetwork(nvector* nlist, double t, double dt)
 {
-	Neuron* nr;
 	for(size_t n=0; n<nlist->size(); n++)
 	{
-		nr = nlist->at(n);
+		Neuron* nr = nlist->at(n);
 		nr->step(t, dt);
 	}		
 }

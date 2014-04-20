@@ -12,7 +12,6 @@ f = plt.system()
 
 if (f =='Darwin'):
 	print 'OSX Identitfied'
-	ext = ['']
 	lib = 0
 	swg = ['-c++', '-I./cpp/', '-Wall']
 	incd= [numpy.get_include(), './cpp/']
@@ -20,7 +19,6 @@ if (f =='Darwin'):
 	xtc = ['-O3']
 else:
 	print 'Assuming Linux'
-	ext = 0
 	lib = 0
 	swg = ['-c++',  '-I./cpp/']
 	incd= [numpy.get_include(), './cpp/']
@@ -42,7 +40,7 @@ nlab_module = Extension('_nlab',
                            include_dirs = incd,
                            swig_opts=swg,
 						   libraries = lib,
-                           extra_link_args = ext,
+                           extra_link_args = [],
 						   extra_compile_args = xtc,
 						   library_dirs=lbdir,
                            )
