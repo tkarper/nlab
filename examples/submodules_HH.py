@@ -4,6 +4,7 @@ sys.path.append('../')
 from math import *
 import numpy as np
 from nlab import *
+from scipy import stats
 import random
 import time
 import matplotlib.pyplot as plt
@@ -48,7 +49,7 @@ nSMperS = 2		# Maximal number of submodules per stellate
 
 # Connection strengths
 sI = 1.5		# Direct current to stellate cells
-inI = 0.4
+inI = 0.4		# Direct current to interneurons
 hdI = 0			# Direct current to HD cells
 thI = 0			# DC to theta oscillator
 th2s = 0		# theta oscillation input to stellates
@@ -56,7 +57,7 @@ s2in = 2.0		# Stellate to interneuron
 in2s = 2.0		# Interneuron to stellate
 in2in= in2s
 hd2s = 0.2		# HD cell to stellate
-tMax = 30000
+tMax = 20000
 
 # Seed random number generator
 randSeed = 273#int(time.time()) % 10000
@@ -79,7 +80,7 @@ for i in range(0,nStell):
 #	stell[i].VP += random.random()*20
 #	stell[i].I = sI * (1 + float(i*i)/(nStell*nStell))
 #	stell[i].I = sI * (1 + i*0.1/nStell)
-	stell[i].I = sI * (3 + 0.6*random.random())
+	stell[i].I = sI * (1.2 + 0.2*random.random())
 #	stell[i].I = sI * random.random()
 #	stell[i].I = sI
 	stell[i].gM = 1
@@ -219,12 +220,16 @@ while(t < tMax):
 	t = t+dt
 	m = m+1
 	
-	# Update HD cells
-	direction = fmod(2*pi*(1 + t/30000), 2*pi)		# Direction in radians, from x-axis
-	for i in range(0, nHead):
-		b = direction/(2*pi)
-		c = 0.2
-		head[i].I = 0.4 + hdI*max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
+#	# Update HD cells
+#	direction = fmod(2*pi*(1 + t/30000), 2*pi)		# Direction in radians, from x-axis
+#	for i in range(0, nHead):
+#		b = direction/(2*pi)
+#		c = 0.2
+#		head[i].I = 0.4 + hdI*max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
+
+#	# Add Brownian noise to DC input
+#	for n in stell:
+#		n.I += dt*random.gauss(0,1)/1000
 	
 #	# Turn off external input for an initial phase
 #	if (t < 10):
@@ -301,6 +306,7 @@ for i in range(len(tFireHist)):
 
 
 plotColors = ['r' for _ in range(nStell)] + ['b' for _ in range(nInter)] + ['g' for _ in range(nHead)]
+tPlot = np.linspace(0, tMax, 100)
 if plotEEG or plotFreq:
 	nPlot = 0
 	if plotEEG:
@@ -328,8 +334,12 @@ if plotEEG or plotFreq:
 			plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
 			if len(freq[i])>0: 
 				plt.plot(tFireHist[i][1:], freq[i], plotColors[i]+'o')
+#				kernel = stats.gaussian_kde(tFireHist[i])
+#				kernel.set_bandwidth(10.0)
+#				plt.plot(tPlot, kernel(tPlot), plotColors[i])
+#				plt.hist(tFireHist[i], 100)
 				plt.xlim((0, t))
-				plt.ylim((min(freq[i])-1, max(freq[i])+1))
+#				plt.ylim((min(freq[i])-1, max(freq[i])+1))
 			if i<nStell:
 				label = "SM:%s"%stringify(s2smInd[i])
 				if nHead > 0:

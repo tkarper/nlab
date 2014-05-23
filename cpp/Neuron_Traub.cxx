@@ -74,9 +74,12 @@ void Neuron_Traub::step(double t, double dt, double input)
 	// Destexhe and Paré 1999
 //	double alpha_w = 0.0001*(Vp+30) / (1-exp(-(Vp+30)/9)),
 //		beta_w = -0.0001*(Vp+30) / (1-exp((Vp+30)/9));
-	double alpha_w = 0.0001*linSmooth(Vp+30, 9),
-		beta_w = -0.0001*linSmooth(Vp+30, -9);
-	w = wp + dt*(alpha_w*(1-wp) - beta_w*wp);
+//	double alpha_w = 0.0001*linSmooth(Vp+30, 9),
+//		beta_w = -0.0001*linSmooth(Vp+30, -9);
+//	w = wp + dt*(alpha_w*(1-wp) - beta_w*wp);
+	double wTau = 1/(alpha_w+beta_w),
+		wInf = 1 / (1 + exp(-(-30-Vp)/-9));
+	w = wp + dt*(wInf - w)/wTau;
 
 	double VNew = Vp + dt/CM*(I+input 
 		- (Vp-ENa) * gNa*hp*pow(mp,3)
