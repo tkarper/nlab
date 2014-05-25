@@ -33,6 +33,13 @@ def stringify(x):
 		separator = ","
 	return label
 
+# Convolve a sequence of point masses 'x' with Gaussians with standard deviation
+# 'sigma' and evaluate at points 't'.
+def mollifyDiracs(x, t, sigma):
+	x = np.transpose(np.atleast_2d(x))
+	y = np.exp(-(x-t)**2 / sigma**2)
+	return y.sum(0)
+
 
 
 
@@ -54,16 +61,16 @@ hdI = 0			# Direct current to HD cells
 thI = 0			# DC to theta oscillator
 th2s = 0		# theta oscillation input to stellates
 s2in = 2.0		# Stellate to interneuron
-in2s = 2.0		# Interneuron to stellate
+in2s = 3.0		# Interneuron to stellate
 in2in= in2s
 hd2s = 0.2		# HD cell to stellate
-tMax = 20000
+tMax = 30000
 
 # Seed random number generator
-randSeed = 273#int(time.time()) % 10000
-#randSeed = 4145
+randSeed = 8447 #int(time.time()) % 10000
 print('Random seed: %d'%randSeed)
 random.seed(randSeed)
+np.random.seed(randSeed)
 
 
 
@@ -127,26 +134,26 @@ s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodule
 #	connect_one_to_many(stell[i], inter[ind], s2in)
 #	s2smInd[i] = ind
 
-## Per-stellate based random connections
-#for i in range(nStell):
-#	ind = np.random.randint(0, nInter, nSMperS)
-#	for j in ind:
-#		s2smInd[i].append(j)
-#	connect_one_to_many(stell[i], inter[ind], s2in)
-#	connect_many_to_one(inter[ind], stell[i], in2s)
+# Per-stellate based random connections
+for i in range(nStell):
+	ind = np.random.choice(nInter, nSMperS, False)
+	for j in ind:
+		s2smInd[i].append(j)
+	connect_one_to_many(stell[i], inter[ind], s2in)
+	connect_many_to_one(inter[ind], stell[i], in2s)
 
-# Distance-determined connections from stellates to interneurons
-#connRad = nStell/(2*nInter)
-connRad = nStell/nInter
-#connRad = (3*nStell)/(2*nInter)
-for i in range(nInter):
-	k = int(nStell*(i/float(nInter)))
-	ind = range(k-connRad, k+connRad)
-	for j in range(len(ind)):
-		ind[j] = ind[j] % nStell
-		s2smInd[ind[j]].append(i)
-	connect_many_to_one(stell[ind], inter[i], s2in)
-	connect_one_to_many(inter[i], stell[ind], in2s)
+## Distance-determined connections from stellates to interneurons
+##connRad = nStell/(2*nInter)
+#connRad = nStell/nInter
+##connRad = (3*nStell)/(2*nInter)
+#for i in range(nInter):
+#	k = int(nStell*(i/float(nInter)))
+#	ind = range(k-connRad, k+connRad)
+#	for j in range(len(ind)):
+#		ind[j] = ind[j] % nStell
+#		s2smInd[ind[j]].append(i)
+#	connect_many_to_one(stell[ind], inter[i], s2in)
+#	connect_one_to_many(inter[i], stell[ind], in2s)
 
 # Create head cells
 head = np.array([Neuron_Traub() for _ in range(nHead)])
@@ -198,7 +205,8 @@ tStart = time.clock()
 
 
 plotLive = 	0
-plotEEG = 	0
+plotEEG = 	1
+saveDataInterval = 50
 plotFiring=	0
 plotS = 	0
 plotFreq = 	1
@@ -209,9 +217,8 @@ if plotLive:
 	plt.ion()
 elif plotEEG:
 	tHist = []
-	VHist = [[] for _ in range(nNeuro)]
-	sHist = [[] for _ in range(nNeuro)]
-
+	IHist = [[] for _ in range(nNeuro)]
+	
 # MAIN TIMELOOP
 t = 0.0
 m = 0
@@ -228,8 +235,9 @@ while(t < tMax):
 #		head[i].I = 0.4 + hdI*max(0.0, 1 - 1/c*fabs(fmod(1.0 + float(i)/float(nHead)+c-b, 1)-c))
 
 #	# Add Brownian noise to DC input
-#	for n in stell:
-#		n.I += dt*random.gauss(0,1)/1000
+#	if t > 10000:
+#		for n in stell:
+#			n.I += dt*random.gauss(0,1)/10
 	
 #	# Turn off external input for an initial phase
 #	if (t < 10):
@@ -278,39 +286,35 @@ while(t < tMax):
 		++plotInd
 	
 	# Store data for plotting
-	saveDataInterval = 0.1
 	if plotEEG and fmod(t, saveDataInterval)<dt:
 		tHist.append(t)
 		for i in range(nNeuro):
-			VHist[i].append(allNeurons[i].V)
-			sHist[i].append(allNeurons[i].s)
+			IHist[i].append(allNeurons[i].I)
 
 
 
 
 print('Simulation finished in %f s'%(time.clock()-tStart))
 print('Plotting data...')
+tStart = time.clock()
 
 
-
-# Compute frequencies
-smoothFreq = 1		# When computing frequencies, take average over subsequent 'smoothFreq' number of peaks
-freq = [[] for _ in range(len(tFireHist))]
-for i in range(len(tFireHist)):
-	nFire = max(len(tFireHist[i])-1, 0)
-	freq[i] = np.zeros(nFire)
-	for j in range(nFire):
-		k = min(j+smoothFreq, nFire) - j
-		freq[i][j] = k*1000/(tFireHist[i][j+k] - tFireHist[i][j])
+## Compute frequencies
+#smoothWidth = 1		# When computing frequencies, take average over subsequent 'smoothFreq' number of peaks
+#freq = [[] for _ in range(len(tFireHist))]
+#for i in range(len(tFireHist)):
+#	nFire = max(len(tFireHist[i])-1, 0)
+#	freq[i] = np.zeros(nFire)
+#	for j in range(nFire):
+#		k = min(j+smoothWidth, nFire) - j
+#		freq[i][j] = k*1000/(tFireHist[i][j+k] - tFireHist[i][j])
 
 
 
 plotColors = ['r' for _ in range(nStell)] + ['b' for _ in range(nInter)] + ['g' for _ in range(nHead)]
-tPlot = np.linspace(0, tMax, 100)
+tPlot = np.linspace(0, tMax, 1000)
 if plotEEG or plotFreq:
 	nPlot = 0
-	if plotEEG:
-		nPlot += nStell+nInter+nHead+nTheta
 	if plotS:
 		nPlot += nStell+nInter+nHead
 	if plotFreq:
@@ -323,23 +327,32 @@ if plotEEG or plotFreq:
 	plt.ion()
 	ctr = 1
 	for i in range(nNeuro):
-		if plotEEG:
-			plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
-			plt.plot(tHist,VHist[i], plotColors[i]);		plt.xlim((0, tMax))
-#			plt.ylabel("SM:%s. HD:%s"%(stringify(s2smInd[i]), stringify(s2hdInd[i])), rotation="horizontal")
-			if plotS:
-				plt.subplot(nPlotY,nPlotX,ctr);	ctr += 1
-				plt.plot(tHist, sHist[i], 'g');			plt.xlim((0, tMax))
 		if plotFreq:
-			plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
-			if len(freq[i])>0: 
-				plt.plot(tFireHist[i][1:], freq[i], plotColors[i]+'o')
-#				kernel = stats.gaussian_kde(tFireHist[i])
-#				kernel.set_bandwidth(10.0)
-#				plt.plot(tPlot, kernel(tPlot), plotColors[i])
-#				plt.hist(tFireHist[i], 100)
-				plt.xlim((0, t))
-#				plt.ylim((min(freq[i])-1, max(freq[i])+1))
+			ax1 = plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
+			# Plot both smoothened frequency and DC input
+
+			# Draw frequency
+#				plt.plot(tFireHist[i][1:], freq[i], plotColors[i]+'o')
+			if len(tFireHist[i])>1: 
+#				kernel = stats.gaussian_kde(tFireHist[i], bw_method=0.05)
+#				freqSmooth = kernel(tPlot)
+#				freqSmooth = freqSmooth * len(tFireHist[i])*1000.0/(tMax*np.max(freqSmooth))
+				freqSmooth = mollifyDiracs(tFireHist[i], tPlot, tMax/500)
+				ax1.plot(tPlot, freqSmooth, plotColors[i])
+				for tl in ax1.get_yticklabels():
+					tl.set_color(plotColors[i])
+			
+			# Draw DC input
+			ax2 = ax1.twinx()
+			ax2.plot(tHist, IHist[i], 'k')
+			ax2.set_ylabel('I', color='k')
+			for tl in ax2.get_yticklabels():
+				tl.set_color('k')
+			plt.ylim((0, 3))
+			plt.xlim((0, t))
+			
+			plt.sca(ax1)
+				
 			if i<nStell:
 				label = "SM:%s"%stringify(s2smInd[i])
 				if nHead > 0:
@@ -356,3 +369,5 @@ if plotFiring:
 		plot(tFireHist[i], ctr*np.ones(tFireHist[i].size), 'r.')
 		ctr += 1
 	plt.ylim((-1, ctr))
+
+print('Plotting took %f s'%(time.clock()-tStart))
