@@ -38,7 +38,8 @@ def stringify(x):
 def mollifyDiracs(x, t, sigma):
 	x = np.transpose(np.atleast_2d(x))
 	y = np.exp(-(x-t)**2 / sigma**2)
-	return y.sum(0)
+	z = y.sum(0)
+	return z
 
 
 
@@ -48,23 +49,23 @@ def mollifyDiracs(x, t, sigma):
 dt = 0.02
 nStell = 32		# Number of stellate cells
 nInter = 4		# Number of interneurons
+nSMperS = 2		# Maximal number of submodules per stellate
 nTheta = 0
 nHead = 0		# Number of head cells
 nHD2S = 3		# Number of head to stellate connections per stellate cell
-nSMperS = 2		# Maximal number of submodules per stellate
 #nSPerIN = 15	# Number of stellates per submodule
 
 # Connection strengths
-sI = 1.5		# Direct current to stellate cells
-inI = 0.4		# Direct current to interneurons
+sI = 0.5		# Direct current to stellate cells
+inI = 0#0.4		# Direct current to interneurons
 hdI = 0			# Direct current to HD cells
 thI = 0			# DC to theta oscillator
 th2s = 0		# theta oscillation input to stellates
-s2in = 2.0		# Stellate to interneuron
-in2s = 3.0		# Interneuron to stellate
+s2in = 0.3		# Stellate to interneuron
+in2s = 0.8		# Interneuron to stellate
 in2in= in2s
 hd2s = 0.2		# HD cell to stellate
-tMax = 30000
+tMax = 10000
 
 # Seed random number generator
 randSeed = 8447 #int(time.time()) % 10000
@@ -81,23 +82,29 @@ print('Initializing...')
 
 
 # Create stellate cells
-stell = np.array([Neuron_Traub() for _ in range(0,nStell)])
+stell = np.array([Neuron_Cond() for _ in range(0,nStell)])
+#stell = np.array([Neuron_Traub() for _ in range(0,nStell)])
 #stell = np.array([Neuron_Stel() for _ in range(0,nStell)])
 for i in range(0,nStell):
 #	stell[i].VP += random.random()*20
 #	stell[i].I = sI * (1 + float(i*i)/(nStell*nStell))
 #	stell[i].I = sI * (1 + i*0.1/nStell)
-	stell[i].I = sI * (1.2 + 0.2*random.random())
+	stell[i].I = sI * (1.0 + 0.5*random.random())
 #	stell[i].I = sI * random.random()
 #	stell[i].I = sI
-	stell[i].gM = 1
+	stell[i].gM = 1.0
+	stell[i].gh = 0
+	stell[i].wCBase = 200
+#	stell[i].wCAmp = 300
 
 # Create interneurons and link to one another
-inter = np.array([Neuron_Traub_IN() for _ in range(0,nInter)])
+inter = np.array([Neuron_Cond() for _ in range(0,nInter)])
+#inter = np.array([Neuron_Traub_IN() for _ in range(0,nInter)])
 #inter = np.array([Neuron_Inter() for _ in range(0,nInter)])
 connect_many_to_many(inter, inter, in2in)
 for i in range(nInter):
 	inter[i].I = inI
+	inter[i].Esyn = -80
 
 # Create submodules
 s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodules to which it belongs
@@ -134,26 +141,28 @@ s2smInd = [[] for _ in range(nStell)]	# For each stellate, list of all submodule
 #	connect_one_to_many(stell[i], inter[ind], s2in)
 #	s2smInd[i] = ind
 
-# Per-stellate based random connections
-for i in range(nStell):
-	ind = np.random.choice(nInter, nSMperS, False)
-	for j in ind:
-		s2smInd[i].append(j)
-	connect_one_to_many(stell[i], inter[ind], s2in)
-	connect_many_to_one(inter[ind], stell[i], in2s)
+if False:
+	# Per-stellate based random connections
+	for i in range(nStell):
+		ind = np.random.choice(nInter, nSMperS, False)
+		for j in ind:
+			s2smInd[i].append(j)
+		connect_one_to_many(stell[i], inter[ind], s2in)
+		connect_many_to_one(inter[ind], stell[i], in2s)
 
-## Distance-determined connections from stellates to interneurons
-##connRad = nStell/(2*nInter)
-#connRad = nStell/nInter
-##connRad = (3*nStell)/(2*nInter)
-#for i in range(nInter):
-#	k = int(nStell*(i/float(nInter)))
-#	ind = range(k-connRad, k+connRad)
-#	for j in range(len(ind)):
-#		ind[j] = ind[j] % nStell
-#		s2smInd[ind[j]].append(i)
-#	connect_many_to_one(stell[ind], inter[i], s2in)
-#	connect_one_to_many(inter[i], stell[ind], in2s)
+if True:
+	# Distance-determined connections from stellates to interneurons
+	#connRad = nStell/(2*nInter)
+	connRad = nStell/nInter
+	#connRad = (3*nStell)/(2*nInter)
+	for i in range(nInter):
+		k = int(nStell*(i/float(nInter)))
+		ind = range(k-connRad, k+connRad)
+		for j in range(len(ind)):
+			ind[j] = ind[j] % nStell
+			s2smInd[ind[j]].append(i)
+		connect_many_to_one(stell[ind], inter[i], s2in)
+		connect_one_to_many(inter[i], stell[ind], in2s)
 
 # Create head cells
 head = np.array([Neuron_Traub() for _ in range(nHead)])
@@ -258,7 +267,7 @@ while(t < tMax):
 
 
 	# Update neural network
-	stepNetwork(allNeurons, t, dt)	
+	stepNetwork(allNeurons, t, dt)
 	# Move to next timestep
 	updateNetwork(allNeurons)
 	
@@ -299,15 +308,15 @@ print('Plotting data...')
 tStart = time.clock()
 
 
-## Compute frequencies
-#smoothWidth = 1		# When computing frequencies, take average over subsequent 'smoothFreq' number of peaks
-#freq = [[] for _ in range(len(tFireHist))]
-#for i in range(len(tFireHist)):
-#	nFire = max(len(tFireHist[i])-1, 0)
-#	freq[i] = np.zeros(nFire)
-#	for j in range(nFire):
-#		k = min(j+smoothWidth, nFire) - j
-#		freq[i][j] = k*1000/(tFireHist[i][j+k] - tFireHist[i][j])
+# Compute frequencies
+smoothWidth = 1		# When computing frequencies, take average over subsequent 'smoothFreq' number of peaks
+freq = [[] for _ in range(len(tFireHist))]
+for i in range(len(tFireHist)):
+	nFire = max(len(tFireHist[i])-1, 0)
+	freq[i] = np.zeros(nFire)
+	for j in range(nFire):
+		k = min(j+smoothWidth, nFire) - j
+		freq[i][j] = k*1000/(tFireHist[i][j+k] - tFireHist[i][j])
 
 
 
@@ -329,35 +338,35 @@ if plotEEG or plotFreq:
 	for i in range(nNeuro):
 		if plotFreq:
 			ax1 = plt.subplot(nPlotY,nPlotX,ctr);		ctr += 1
-			# Plot both smoothened frequency and DC input
-
+			
+			# Draw DC input
+			ax1.plot(tHist, IHist[i], 'k')
+			ax1.set_ylabel('I', color='k')
+			for tl in ax1.get_yticklabels():
+				tl.set_color('k')
+			plt.ylim((0, 3))
+			
 			# Draw frequency
-#				plt.plot(tFireHist[i][1:], freq[i], plotColors[i]+'o')
 			if len(tFireHist[i])>1: 
+				ax2 = ax1.twinx()
+				plt.plot(tFireHist[i][1:], freq[i], plotColors[i]+'o')
+#				plt.ylim((freq[i][-1]/2, 3*freq[i][-1]/2))
 #				kernel = stats.gaussian_kde(tFireHist[i], bw_method=0.05)
 #				freqSmooth = kernel(tPlot)
 #				freqSmooth = freqSmooth * len(tFireHist[i])*1000.0/(tMax*np.max(freqSmooth))
-				freqSmooth = mollifyDiracs(tFireHist[i], tPlot, tMax/500)
-				ax1.plot(tPlot, freqSmooth, plotColors[i])
-				for tl in ax1.get_yticklabels():
+#				freqSmooth = mollifyDiracs(tFireHist[i], tPlot, tMax/300)
+#				ax1.plot(tPlot, freqSmooth, plotColors[i])
+				for tl in ax2.get_yticklabels():
 					tl.set_color(plotColors[i])
-			
-			# Draw DC input
-			ax2 = ax1.twinx()
-			ax2.plot(tHist, IHist[i], 'k')
-			ax2.set_ylabel('I', color='k')
-			for tl in ax2.get_yticklabels():
-				tl.set_color('k')
-			plt.ylim((0, 3))
+				
 			plt.xlim((0, t))
 			
-			plt.sca(ax1)
-				
 			if i<nStell:
 				label = "SM:%s"%stringify(s2smInd[i])
 				if nHead > 0:
 					label += ". HD:%s"%stringify(s2hdInd[i])
-				plt.ylabel(label, rotation="horizontal")
+				plt.ylabel(label)#, rotation="horizontal")
+	
 	plt.draw()
 
 

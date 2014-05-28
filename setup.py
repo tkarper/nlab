@@ -23,13 +23,14 @@ else:
 	swg = ['-c++',  '-I./cpp/']
 	incd= [numpy.get_include(), './cpp/']
 	lbdir = 0
-	xtc  = ['-fpermissive', '-O3']
+	xtc  = ['-fpermissive', '-O3', '-std=gnu++11']
 
 nlab_module = Extension('_nlab',
                            sources=['cpp/Neuron.cxx',
 								    'cpp/Neuron_Ack.cxx',
 								    'cpp/Neuron_Stel.cxx',
 								    'cpp/Neuron_Traub.cxx',
+								    'cpp/Neuron_Cond.cxx',
                            			'cpp/Neuron_TIF.cxx',
                            			'cpp/Neuron_ML.cxx',
                            			'cpp/Neuron_HH.cxx',
